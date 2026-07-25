@@ -11,7 +11,9 @@ from app.models.index_values import IndexValue
 from app.models.reference_data import Commodity, Market, Sector
 
 
-def iso_z(value: datetime) -> str:
+def iso_z(value: datetime | None) -> str:
+    if value is None:
+        value = datetime.now(UTC)
     if value.tzinfo is None:
         value = value.replace(tzinfo=UTC)
     return value.astimezone(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")

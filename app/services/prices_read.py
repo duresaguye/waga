@@ -214,7 +214,8 @@ class PricesReadService:
                 index_value = _find_latest(latest, market.id, commodity.id)
                 if index_value is None:
                     continue
-                hours_since_last = (now - index_value.computed_at).total_seconds() / 3600
+                computed_at = index_value.computed_at or now
+                hours_since_last = (now - computed_at).total_seconds() / 3600
                 cell = {
                     "commodity_code": commodity.code,
                     "status": index_value.status.value,
@@ -347,6 +348,9 @@ class PricesReadService:
                         n_contributors=0,
                         source_mix={},
                         status=IndexStatus.INSUFFICIENT_DATA,
+                        # In-memory placeholder only — not persisted. Must set
+                        # computed_at so read serializers do not crash on None.
+                        computed_at=now,
                     )
                 )
         return result
