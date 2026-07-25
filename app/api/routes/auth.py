@@ -12,7 +12,6 @@ from app.schemas.auth import (
     InviteUserResponse,
     LoginRequest,
     RefreshTokenRequest,
-    RegisterRequest,
     TokenResponse,
     UserResponse,
 )
@@ -31,34 +30,6 @@ from app.services.exceptions import (
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-
-@router.post(
-    "/register",
-    response_model=TokenResponse,
-    status_code=status.HTTP_201_CREATED,
-)
-async def register(
-    request: RegisterRequest,
-    auth_service: Annotated[AuthService, Depends(get_auth_service)],
-) -> TokenResponse:
-    try:
-        tokens = await auth_service.register(
-            str(request.email),
-            request.password,
-            request.display_name,
-        )
-    except EmailAlreadyRegisteredError as error:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email is already registered",
-        ) from error
-    except PasswordPolicyError as error:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(error),
-        ) from error
-    return _token_response(tokens)
 
 
 @router.post("/login", response_model=TokenResponse)

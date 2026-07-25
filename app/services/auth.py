@@ -11,8 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.config import Settings
 from app.models.admin import InviteToken
 from app.models.auth import AuthSession, User
-from app.models.contributors import Contributor
-from app.models.enums import ContributorKind, UserRole, UserStatus
+from app.models.enums import UserRole, UserStatus
 from app.repositories.auth_sessions import AuthSessionRepository
 from app.repositories.contributors import ContributorRepository
 from app.repositories.invite_tokens import InviteTokenRepository
@@ -70,52 +69,6 @@ class AuthService:
         self._jwt = jwt_service
         self._settings = settings
         self._clock = clock
-
-    async def register(
-        self,
-        email: str,
-        password: str,
-        display_name: str | None,
-    ) -> IssuedTokens:
-        normalized_email = self._normalize_email(email)
-        self._validate_password(password)
-        if await self._users.get_by_email(normalized_email) is not None:
-            await self._session.rollback()
-            raise EmailAlreadyRegisteredError
-
-        user_id = uuid4()
-        user = User(
-            id=user_id,
-            email=normalized_email,
-            password_hash=await self._passwords.hash(password),
-            display_name=display_name,
-            role=UserRole.CONTRIBUTOR,
-            status=UserStatus.ACTIVE,
-            auth_version=1,
-            failed_login_attempts=0,
-        )
-        contributor = Contributor(
-            id=uuid4(),
-            user_id=user_id,
-            external_id=user_id,
-            kind=ContributorKind.USER,
-        )
-        self._users.add(user)
-        self._contributors.add(contributor)
-        await self._session.flush()
-
-        refresh_token, auth_session = self._new_auth_session(user_id)
-        self._auth_sessions.add(auth_session)
-
-        try:
-            await self._session.commit()
-        except IntegrityError as error:
-            await self._session.rollback()
-            if _is_unique_violation(error):
-                raise EmailAlreadyRegisteredError from error
-            raise
-
-        return self._issued_tokens(user, refresh_token)
 
     async def login(self, email: str, password: str) -> IssuedTokens:
         normalized_email = self._normalize_email(email)
@@ -271,16 +224,7 @@ class AuthService:
             await self._session.rollback()
             raise EmailAlreadyRegisteredError
 
-        user = User(
-            id=uuid4(),
-            email=normalized_email,
-            password_hash=await self._passwords.hash(password),
-            display_name=display_name,
-            role=UserRole.ADMIN,
-            status=UserStatus.ACTIVE,
-            auth_version=1,
-            failed_login_attempts=0,
-        )
+        user = await self._new_admin_user(normalized_email, password, display_name)
         self._users.add(user)
         try:
             await self._session.commit()
@@ -290,6 +234,50 @@ class AuthService:
                 raise EmailAlreadyRegisteredError from error
             raise
         return user
+
+    async def ensure_admin_user(
+        self,
+        email: str,
+        password: str,
+        display_name: str | None,
+    ) -> tuple[User, bool]:
+        """Idempotent admin seed — creates the user only when the email is unused."""
+        normalized_email = self._normalize_email(email)
+        self._validate_password(password)
+        existing = await self._users.get_by_email(normalized_email)
+        if existing is not None:
+            return existing, False
+
+        user = await self._new_admin_user(normalized_email, password, display_name)
+        self._users.add(user)
+        try:
+            await self._session.commit()
+        except IntegrityError as error:
+            await self._session.rollback()
+            if _is_unique_violation(error):
+                existing = await self._users.get_by_email(normalized_email)
+                if existing is not None:
+                    return existing, False
+                raise EmailAlreadyRegisteredError from error
+            raise
+        return user, True
+
+    async def _new_admin_user(
+        self,
+        normalized_email: str,
+        password: str,
+        display_name: str | None,
+    ) -> User:
+        return User(
+            id=uuid4(),
+            email=normalized_email,
+            password_hash=await self._passwords.hash(password),
+            display_name=display_name,
+            role=UserRole.ADMIN,
+            status=UserStatus.ACTIVE,
+            auth_version=1,
+            failed_login_attempts=0,
+        )
 
     async def invite_user(
         self,

@@ -8,9 +8,11 @@ ENV UV_PYTHON=python3
 ENV PYTHONUNBUFFERED=1
 
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev
+RUN uv sync --frozen --no-dev --no-install-project
 
 COPY . .
+
+RUN uv sync --frozen --no-dev
 
 RUN chmod +x scripts/start-api.sh scripts/start-bot.sh scripts/migrate.sh
 

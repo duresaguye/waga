@@ -8,6 +8,7 @@ from app.config import get_settings
 from app.database import engine, session_factory
 from app.repositories.auth_sessions import AuthSessionRepository
 from app.repositories.contributors import ContributorRepository
+from app.repositories.invite_tokens import InviteTokenRepository
 from app.repositories.users import UserRepository
 from app.security import JWTService, PasswordService
 from app.services.auth import AuthService
@@ -28,6 +29,7 @@ async def create_admin(email: str, display_name: str | None, password: str) -> N
             UserRepository(session),
             AuthSessionRepository(session),
             ContributorRepository(session),
+            InviteTokenRepository(session),
             PasswordService(),
             JWTService(settings),
             settings,

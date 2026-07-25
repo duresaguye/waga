@@ -19,6 +19,7 @@ from app.services.exceptions import (
     SubmissionNotFoundError,
     SubmissionValidationError,
 )
+from app.services.index_calculation import IndexCalculationService
 from app.services.review_triage import ReviewTriageService, TriageResult, facts_as_dict
 
 
@@ -28,12 +29,14 @@ class ReviewService:
         session: AsyncSession,
         submissions: SubmissionRepository,
         scores: AgentScoreService,
+        index_calculation: IndexCalculationService,
         settings: Settings,
         triage: ReviewTriageService | None = None,
     ) -> None:
         self._session = session
         self._submissions = submissions
         self._scores = scores
+        self._index_calculation = index_calculation
         self._settings = settings
         self._triage = triage or ReviewTriageService(AddisChatClient(settings))
 
@@ -138,6 +141,15 @@ class ReviewService:
             accepted=accepted,
             commit=False,
         )
+        if accepted:
+            submission = bundle["submission"]
+            if submission.market_id is not None and submission.commodity_id is not None:
+                await self._index_calculation.recompute_cell(
+                    market_id=submission.market_id,
+                    commodity_id=submission.commodity_id,
+                    trigger_verification_id=verification.id,
+                    window_end=submission.received_at,
+                )
         await self._session.commit()
         await self._session.refresh(verification)
         return self._to_item(bundle)

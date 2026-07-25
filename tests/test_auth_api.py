@@ -14,43 +14,23 @@ from app.services.exceptions import InvalidCredentialsError
 
 
 class FakeAuthService:
-    async def register(
-        self,
-        email: str,
-        password: str,
-        display_name: str | None,
-    ) -> IssuedTokens:
-        _ = (email, password, display_name)
-        return IssuedTokens("access-token", "refresh-token", 900)
-
     async def login(self, email: str, password: str) -> IssuedTokens:
         _ = (email, password)
         raise InvalidCredentialsError
 
 
-async def test_register_returns_json_token_pair() -> None:
-    app.dependency_overrides[get_auth_service] = lambda: FakeAuthService()
+async def test_public_register_route_removed() -> None:
     transport = ASGITransport(app=app)
-    try:
-        async with AsyncClient(transport=transport, base_url="http://test") as client:
-            response = await client.post(
-                "/api/v1/auth/register",
-                json={
-                    "email": "person@example.com",
-                    "password": "valid-password",
-                    "display_name": "Person",
-                },
-            )
-    finally:
-        app.dependency_overrides.clear()
-
-    assert response.status_code == 201
-    assert response.json() == {
-        "access_token": "access-token",
-        "refresh_token": "refresh-token",
-        "token_type": "bearer",
-        "expires_in": 900,
-    }
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "person@example.com",
+                "password": "valid-password",
+                "display_name": "Person",
+            },
+        )
+    assert response.status_code == 404
 
 
 async def test_login_uses_generic_invalid_credentials_response() -> None:

@@ -219,42 +219,24 @@ def add_user(
     return user
 
 
-async def test_registration_creates_linked_contributor_and_session() -> None:
+async def test_ensure_admin_user_is_idempotent() -> None:
     context = make_service()
 
-    tokens = await context.service.register(
-        " Person@Example.COM ",
+    user, created = await context.service.ensure_admin_user(
+        "admin@waga.com",
         "valid-password",
-        "Person",
+        "Super Admin",
     )
+    assert created is True
+    assert user.role == UserRole.ADMIN
 
-    user = next(iter(context.users.users.values()))
-    contributor = context.contributors.contributors[0]
-    auth_session = next(iter(context.auth_sessions.sessions.values()))
-    assert user.email == "person@example.com"
-    assert user.role == UserRole.CONTRIBUTOR
-    assert contributor.user_id == user.id
-    assert contributor.external_id == user.id
-    assert auth_session.user_id == user.id
-    assert auth_session.refresh_token_hash != tokens.refresh_token
-    assert context.service.hash_refresh_token(tokens.refresh_token) == (
-        auth_session.refresh_token_hash
+    again, created_again = await context.service.ensure_admin_user(
+        "admin@waga.com",
+        "valid-password",
+        "Super Admin",
     )
-    assert context.database.commits == 1
-
-
-async def test_registration_rejects_duplicate_email() -> None:
-    context = make_service()
-    add_user(context)
-
-    with pytest.raises(EmailAlreadyRegisteredError):
-        await context.service.register(
-            "PERSON@example.com",
-            "valid-password",
-            None,
-        )
-
-    assert context.database.rollbacks == 1
+    assert created_again is False
+    assert again.id == user.id
 
 
 async def test_login_locks_account_after_five_failures() -> None:
@@ -298,11 +280,8 @@ async def test_unknown_login_runs_dummy_password_verification() -> None:
 
 async def test_refresh_rotation_and_reuse_revoke_the_family() -> None:
     context = make_service()
-    initial = await context.service.register(
-        "person@example.com",
-        "valid-password",
-        None,
-    )
+    user = add_user(context)
+    initial = await context.service.login(user.email, "valid-password")
 
     rotated = await context.service.refresh(initial.refresh_token)
     old_session = context.auth_sessions.sessions[

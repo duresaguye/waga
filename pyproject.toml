@@ -27,6 +27,9 @@ dependencies = [
 [project.scripts]
 waga-create-admin = "app.commands.create_admin:main"
 waga-seed-phase1 = "app.commands.seed_phase1:main"
+waga-seed-subscriptions = "app.commands.seed_subscriptions:main"
+waga-seed-admin = "app.commands.seed_admin:main"
+waga-rebuild-index = "app.commands.rebuild_index:main"
 waga-telegram-bot = "telegram_bot.bot:main"
 
 [dependency-groups]

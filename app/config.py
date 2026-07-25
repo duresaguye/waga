@@ -35,9 +35,56 @@ class Settings(BaseSettings):
     addis_ai_default_lang: str = "am"
     review_ai_enabled: bool = True
 
-    @field_validator("addis_ai_api_key", mode="before")
+    # Subscription billing (Chapa)
+    trial_days: int = 14
+    pro_exports_per_day: int = 1
+    history_days_monthly: int = 30
+    history_days_annual: int = 90
+    pro_monthly_etb: int = 1600
+    pro_annual_etb: int = 16000
+    chapa_test_secret_key: SecretStr | None = None
+    chapa_test_public_key: SecretStr | None = None
+    chapa_webhook_secret: SecretStr | None = None
+    chapa_base_url: str = "https://api.chapa.co/v1"
+    chapa_callback_url: str = "http://127.0.0.1:8000/api/v1/webhooks/chapa/callback"
+    chapa_return_url: str = "http://localhost:5173/account/billing"
+
+    # Index computation
+    index_window_hours: int = 72
+    publication_threshold: int = 3
+    method_version: str = "waga-index-v1"
+    heat_method_version: str = "waga-heat-v1"
+    affordability_method_version: str = "waga-affordability-v1"
+    spike_method_version: str = "waga-spike-v1"
+    cost_index_method_version: str = "waga-cost-index-v1"
+    city_code: str = "addis_ababa"
+    currency_code: str = "ETB"
+    public_history_days: int = 30
+
+    # Demo admin seed (development / waga-seed-admin)
+    seed_admin_email: str = "admin@waga.com"
+    seed_admin_password: SecretStr = SecretStr("AdminPassword12!")
+    seed_admin_display_name: str = "Super Admin"
+
+    # ECWG MEB reference figures (static; label as_of honestly in responses)
+    ecwg_meb_source: str = "ECWG MEB National Reference Guide, June 2025"
+    ecwg_national_meb_full_etb: float = 17700.0
+    ecwg_national_meb_food_etb: float = 16135.0
+    ecwg_as_of: str = "2025-12-01"
+    ecwg_review_cadence_months: int = 3
+    ecwg_revision_trigger: str = (
+        "Six consecutive months of price movement in one direction"
+    )
+
+    @field_validator(
+        "addis_ai_api_key",
+        "chapa_test_secret_key",
+        "chapa_test_public_key",
+        "chapa_webhook_secret",
+        mode="before",
+    )
     @classmethod
-    def empty_addis_key_as_none(cls, value: object) -> object:
+    def empty_secret_as_none(cls, value: object) -> object:
         if value is None:
             return None
         if isinstance(value, str) and not value.strip():
@@ -89,6 +136,24 @@ class Settings(BaseSettings):
             and self.addis_ai_api_key is not None
             and bool(self.addis_ai_api_key.get_secret_value().strip())
         )
+
+    def chapa_enabled(self) -> bool:
+        return (
+            self.chapa_test_secret_key is not None
+            and bool(self.chapa_test_secret_key.get_secret_value().strip())
+        )
+
+    def chapa_secret_key(self) -> str | None:
+        if self.chapa_test_secret_key is None:
+            return None
+        value = self.chapa_test_secret_key.get_secret_value().strip()
+        return value or None
+
+    def chapa_webhook_secret_value(self) -> str | None:
+        if self.chapa_webhook_secret is None:
+            return None
+        value = self.chapa_webhook_secret.get_secret_value().strip()
+        return value or None
 
 
 @lru_cache

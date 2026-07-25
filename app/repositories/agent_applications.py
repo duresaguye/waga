@@ -25,6 +25,15 @@ class AgentApplicationRepository:
         )
         return cast(AgentApplication | None, await self._session.scalar(statement))
 
+    async def get_latest_by_telegram_id(self, telegram_id: str) -> AgentApplication | None:
+        statement = (
+            select(AgentApplication)
+            .where(AgentApplication.telegram_id == telegram_id)
+            .order_by(AgentApplication.created_at.desc())
+            .limit(1)
+        )
+        return cast(AgentApplication | None, await self._session.scalar(statement))
+
     async def list_by_status(
         self,
         status: AgentApplicationStatus | None = None,

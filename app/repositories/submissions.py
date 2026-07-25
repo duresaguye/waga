@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, cast
 from uuid import UUID
@@ -147,25 +148,75 @@ class SubmissionRepository:
         values = await self._session.scalars(statement)
         return [Decimal(str(value)) for value in values.all()]
 
-    async def list_contributor_prices(
+    async def list_accepted_in_window(
         self,
         *,
-        contributor_id: UUID,
+        market_id: int,
         commodity_id: int,
-        exclude_submission_id: UUID | None = None,
-        limit: int = 10,
-    ) -> list[Decimal]:
-        statement: Select[tuple[Decimal]] = (
-            select(Submission.price_canonical)
+        window_start: datetime,
+        window_end: datetime,
+    ) -> list[dict[str, Any]]:
+        statement = (
+            select(
+                Submission,
+                Contributor,
+            )
+            .join(
+                SubmissionVerification,
+                SubmissionVerification.submission_id == Submission.id,
+            )
+            .outerjoin(Contributor, Contributor.id == Submission.contributor_id)
             .where(
-                Submission.contributor_id == contributor_id,
+                Submission.market_id == market_id,
                 Submission.commodity_id == commodity_id,
+                SubmissionVerification.outcome == ReviewOutcome.ACCEPTED,
+                Submission.received_at >= window_start,
+                Submission.received_at <= window_end,
                 Submission.price_canonical.is_not(None),
             )
-            .order_by(Submission.received_at.desc())
-            .limit(limit)
+            .order_by(Submission.received_at.asc())
         )
+        rows = await self._session.execute(statement)
+        items: list[dict[str, Any]] = []
+        for submission, contributor in rows.all():
+            items.append({"submission": submission, "contributor": contributor})
+        return items
+
         if exclude_submission_id is not None:
             statement = statement.where(Submission.id != exclude_submission_id)
         values = await self._session.scalars(statement)
         return [Decimal(str(value)) for value in values.all()]
+
+    async def get_accepted_verification(
+        self, submission_id: UUID
+    ) -> SubmissionVerification | None:
+        statement = select(SubmissionVerification).where(
+            SubmissionVerification.submission_id == submission_id,
+            SubmissionVerification.outcome == ReviewOutcome.ACCEPTED,
+        )
+        return cast(
+            SubmissionVerification | None, await self._session.scalar(statement)
+        )
+
+    async def list_all_accepted_cells(self) -> list[dict[str, Any]]:
+        statement = (
+            select(
+                Submission,
+                SubmissionVerification,
+            )
+            .join(
+                SubmissionVerification,
+                SubmissionVerification.submission_id == Submission.id,
+            )
+            .where(
+                SubmissionVerification.outcome == ReviewOutcome.ACCEPTED,
+                Submission.market_id.is_not(None),
+                Submission.commodity_id.is_not(None),
+            )
+            .order_by(Submission.received_at.asc())
+        )
+        rows = await self._session.execute(statement)
+        items: list[dict[str, Any]] = []
+        for submission, verification in rows.all():
+            items.append({"submission": submission, "verification": verification})
+        return items
