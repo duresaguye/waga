@@ -24,6 +24,9 @@ from app.services.agent_score import AgentScoreService
 from app.services.auth import AuthService
 from app.services.exceptions import InvalidAccessTokenError
 from app.services.reference_data import ReferenceDataService
+from app.repositories.index_values import IndexValueRepository
+from app.services.index_calculation import IndexCalculationService
+from app.services.intelligence import IntelligenceService
 from app.services.reviews import ReviewService
 from app.services.submissions import SubmissionService
 
@@ -134,13 +137,44 @@ def get_submission_service(
     )
 
 
+def get_index_value_repository(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+) -> IndexValueRepository:
+    return IndexValueRepository(session)
+
+
+def get_index_calculation_service(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    index_values: Annotated[IndexValueRepository, Depends(get_index_value_repository)],
+    reference_data: Annotated[
+        ReferenceDataRepository,
+        Depends(get_reference_data_repository),
+    ],
+) -> IndexCalculationService:
+    return IndexCalculationService(session, index_values, reference_data)
+
+
+def get_intelligence_service(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    index_values: Annotated[IndexValueRepository, Depends(get_index_value_repository)],
+    reference_data: Annotated[
+        ReferenceDataRepository,
+        Depends(get_reference_data_repository),
+    ],
+) -> IntelligenceService:
+    return IntelligenceService(session, index_values, reference_data)
+
+
 def get_review_service(
     session: Annotated[AsyncSession, Depends(get_db_session)],
     submissions: Annotated[SubmissionRepository, Depends(get_submission_repository)],
     scores: Annotated[AgentScoreService, Depends(get_agent_score_service)],
     settings: Annotated[Settings, Depends(get_settings)],
+    index_calc: Annotated[
+        IndexCalculationService, Depends(get_index_calculation_service)
+    ],
 ) -> ReviewService:
-    return ReviewService(session, submissions, scores, settings)
+    return ReviewService(session, submissions, scores, settings, index_calc)
 
 
 @lru_cache

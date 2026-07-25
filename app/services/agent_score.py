@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import secrets
 from decimal import Decimal, ROUND_HALF_UP
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.contributors import AgentScoreEvent, Contributor
+from app.models.contributors import AgentInviteCode, AgentScoreEvent, Contributor
 from app.models.enums import AgentScoreEventType, ContributorKind
 from app.models.reward_settings import AgentRedeemRequest, AgentRewardSettings
 from app.repositories.contributors import ContributorRepository
@@ -27,6 +28,9 @@ from app.services.exceptions import (
     AgentRedeemNotReadyError,
     AgentScoreError,
 )
+
+# Avoid ambiguous characters (0/O, 1/I) so codes are easy to read aloud.
+_INVITE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 
 class AgentScoreService:
@@ -77,6 +81,61 @@ class AgentScoreService:
         await self._session.commit()
         await self._session.refresh(settings)
         return settings
+
+    @staticmethod
+    def generate_invite_code() -> str:
+        """Hard-to-guess code, e.g. WAGA-K7M2-9XQR-4HNP."""
+        chunks = [
+            "".join(secrets.choice(_INVITE_ALPHABET) for _ in range(4))
+            for _ in range(3)
+        ]
+        return "WAGA-" + "-".join(chunks)
+
+    async def create_invite(
+        self,
+        *,
+        max_uses: int = 1,
+        label_note: str | None = None,
+    ) -> AgentInviteCode:
+        """Create a random invite code. Default: single-use (others cannot reuse)."""
+        if max_uses < 0:
+            raise AgentScoreError("max_uses must be >= 0 (0 = unlimited)")
+
+        for _ in range(8):
+            code = self.generate_invite_code()
+            existing = await self._contributors.get_invite_by_code(code)
+            if existing is not None:
+                continue
+            invite = AgentInviteCode(
+                id=uuid4(),
+                code=code,
+                is_active=True,
+                max_uses=max_uses,
+                uses_count=0,
+            )
+            self._contributors.add_invite(invite)
+            try:
+                await self._session.commit()
+            except IntegrityError:
+                await self._session.rollback()
+                continue
+            await self._session.refresh(invite)
+            _ = label_note
+            return invite
+
+        raise AgentScoreError("Could not generate a unique invite code")
+
+    async def list_invites(self, *, limit: int = 50) -> list[AgentInviteCode]:
+        return await self._contributors.list_invites(limit=limit)
+
+    async def deactivate_invite(self, invite_id: UUID) -> AgentInviteCode:
+        invite = await self._contributors.get_invite_by_id(invite_id)
+        if invite is None:
+            raise AgentInviteInvalidError("Invite code not found")
+        invite.is_active = False
+        await self._session.commit()
+        await self._session.refresh(invite)
+        return invite
 
     async def activate_with_invite(
         self,

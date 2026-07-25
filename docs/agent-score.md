@@ -110,9 +110,13 @@ Status labels:
 ### 1) Become an agent
 
 1. Team meets/trains the person and assigns a market.  
-2. Team gives invite code (DB table `agent_invite_codes`, seed: `waga-addis-01`).  
-3. Person sends in Telegram: `/agent WAGA-ADDIS-01`  
+2. Admin generates a hard-to-guess code:  
+   `POST /api/v1/admin/agent-invites` → e.g. `WAGA-K7M2-9XQR-4HNP` (default **1 use**).  
+3. Team sends that person: “In Telegram send `/agent WAGA-K7M2-9XQR-4HNP`”.  
 4. Backend: `POST /api/v1/agents/activate`  
+
+Also: `GET /admin/agent-invites`, `POST /admin/agent-invites/{id}/deactivate`.  
+Old seed `waga-addis-01` still works until you deactivate it.  
    - Creates/updates `contributors` with `kind=agent`, `is_agent=true`, `telegram_id=...`  
    - Writes `agent_score_events` row type `activate`  
 

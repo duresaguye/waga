@@ -1,12 +1,45 @@
+from datetime import datetime
 from decimal import Decimal
+from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class AgentActivateRequest(BaseModel):
     telegram_id: str = Field(min_length=1, max_length=64)
     invite_code: str = Field(min_length=1, max_length=64)
     display_name: str | None = Field(default=None, max_length=120)
+
+
+class AgentInviteCreateRequest(BaseModel):
+    """max_uses=1 → one person only; 0 → unlimited."""
+
+    max_uses: int = Field(default=1, ge=0, le=10_000)
+
+
+class AgentInviteResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    code: str
+    is_active: bool
+    max_uses: int
+    uses_count: int
+    created_at: datetime
+    telegram_hint: str
+
+    @classmethod
+    def from_invite(cls, invite: object) -> "AgentInviteResponse":
+        code = str(getattr(invite, "code"))
+        return cls(
+            id=getattr(invite, "id"),
+            code=code,
+            is_active=bool(getattr(invite, "is_active")),
+            max_uses=int(getattr(invite, "max_uses")),
+            uses_count=int(getattr(invite, "uses_count")),
+            created_at=getattr(invite, "created_at"),
+            telegram_hint=f"/agent {code}",
+        )
 
 
 class AgentScoreResponse(BaseModel):

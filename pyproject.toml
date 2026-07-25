@@ -19,7 +19,7 @@ dependencies = [
     "pwdlib[argon2]>=0.3.0",
     "pyjwt>=2.10.1",
     "python-multipart>=0.0.32",
-    "python-telegram-bot>=22.5",
+    "python-telegram-bot[webhooks]>=22.5",
     "sqlalchemy>=2.0.51",
     "uvicorn[standard]>=0.51.0",
 ]
