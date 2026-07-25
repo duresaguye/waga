@@ -1,0 +1,28 @@
+{
+  "generated_at": "2026-07-25T06:00:00Z",
+  "seed": 20260725,
+  "snapshot_id": "snap_2026-07-25T06_v1",
+  "contract": "docs/api-contracts-v1.md",
+  "types": "contracts/types.ts",
+  "endpoints": {
+    "GET /reference": "mock/reference.json",
+    "GET /prices/current": "mock/prices-current.json",
+    "GET /prices/series": "mock/prices-series.json",
+    "GET /prices/series?market=*": "mock/prices-series-by-market.json",
+    "GET /coverage": "mock/coverage.json",
+    "GET /affordability": "mock/affordability.json",
+    "GET /heatmap": "mock/heatmap.json",
+    "GET /alerts": "mock/alerts.json",
+    "GET /meb/food-line": "mock/meb-food-line.json",
+    "POST /copilot/ask": "mock/copilot-ask.json",
+    "POST /impact": "mock/impact.json",
+    "GET /business/cost-index": "mock/business-cost-index.json",
+    "GET /business/sourcing": "mock/business-sourcing.json",
+    "POST /business/benchmark": "mock/business-benchmark.json",
+    "POST /business/ask": "mock/business-ask.json",
+    "GET /research/snapshots": "mock/research-snapshots.json",
+    "GET /research/methodology": "mock/research-methodology.json",
+    "GET /research/codebook": "mock/research-codebook.json",
+    "GET /exports/panel.csv": "mock/panel.csv"
+  }
+}

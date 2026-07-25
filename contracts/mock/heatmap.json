@@ -1,0 +1,464 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-heat-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "metric": "pct_change_7d",
+    "method_version": "waga-heat-v1",
+    "markets": [
+      {
+        "market_code": "merkato",
+        "market_name_en": "Merkato",
+        "latitude": 9.0341,
+        "longitude": 38.7395,
+        "status": "published",
+        "heat": 4.6,
+        "band": "warm",
+        "cells_published": 4,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 108.36,
+            "pct_change": 2.8,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 62.42,
+            "pct_change": 5.5,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 40.83,
+            "pct_change": 4.1,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 53.69,
+            "pct_change": 6.5,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          }
+        ]
+      },
+      {
+        "market_code": "ehil_berenda",
+        "market_name_en": "Ehil Berenda",
+        "latitude": 9.0333,
+        "longitude": 38.7389,
+        "status": "published",
+        "heat": 3.3,
+        "band": "warm",
+        "cells_published": 4,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 100.74,
+            "pct_change": 3.7,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 65.79,
+            "pct_change": 0.6,
+            "band": "stable"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 42.48,
+            "pct_change": 2.4,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 53.58,
+            "pct_change": 9.1,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          }
+        ]
+      },
+      {
+        "market_code": "atikilt_tera",
+        "market_name_en": "Atikilt Tera",
+        "latitude": 9.03,
+        "longitude": 38.745,
+        "status": "published",
+        "heat": 11.4,
+        "band": "critical",
+        "cells_published": 5,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 110.2,
+            "pct_change": 4.0,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 67.06,
+            "pct_change": 5.1,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 43.4,
+            "pct_change": 1.2,
+            "band": "stable"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 60.91,
+            "pct_change": 34.9,
+            "band": "critical"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "published",
+            "value": 184.62,
+            "pct_change": 4.5,
+            "band": "warm"
+          }
+        ]
+      },
+      {
+        "market_code": "asko",
+        "market_name_en": "Asko",
+        "latitude": 9.0489,
+        "longitude": 38.6889,
+        "status": "published",
+        "heat": 4.0,
+        "band": "warm",
+        "cells_published": 3,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 112.43,
+            "pct_change": 6.5,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 67.9,
+            "pct_change": 3.3,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 44.29,
+            "pct_change": 2.8,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          }
+        ]
+      },
+      {
+        "market_code": "saris",
+        "market_name_en": "Saris",
+        "latitude": 8.9797,
+        "longitude": 38.7622,
+        "status": "published",
+        "heat": 4.1,
+        "band": "warm",
+        "cells_published": 4,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 114.83,
+            "pct_change": 4.9,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 69.21,
+            "pct_change": 5.3,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 43.66,
+            "pct_change": 0.7,
+            "band": "stable"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 55.95,
+            "pct_change": 7.3,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          }
+        ]
+      },
+      {
+        "market_code": "akaki",
+        "market_name_en": "Akaki",
+        "latitude": 8.8939,
+        "longitude": 38.8069,
+        "status": "published",
+        "heat": 4.7,
+        "band": "warm",
+        "cells_published": 4,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 69.38,
+            "pct_change": 5.7,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 44.47,
+            "pct_change": 2.5,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 55.42,
+            "pct_change": 4.9,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "published",
+            "value": 204.01,
+            "pct_change": 5.5,
+            "band": "hot"
+          }
+        ]
+      },
+      {
+        "market_code": "kera",
+        "market_name_en": "Kera",
+        "latitude": 8.9994,
+        "longitude": 38.7481,
+        "status": "published",
+        "heat": 5.8,
+        "band": "hot",
+        "cells_published": 4,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 115.7,
+            "pct_change": 4.5,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 69.73,
+            "pct_change": 0.1,
+            "band": "stable"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 51.43,
+            "pct_change": 16.7,
+            "band": "critical"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 57.07,
+            "pct_change": 7.3,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          }
+        ]
+      },
+      {
+        "market_code": "shola",
+        "market_name_en": "Shola Gebeya",
+        "latitude": 9.0244,
+        "longitude": 38.7986,
+        "status": "published",
+        "heat": 4.1,
+        "band": "warm",
+        "cells_published": 4,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 122.04,
+            "pct_change": 6.0,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 72.25,
+            "pct_change": 2.5,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "published",
+            "value": 46.05,
+            "pct_change": 1.0,
+            "band": "stable"
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 61.0,
+            "pct_change": 7.6,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          }
+        ]
+      },
+      {
+        "market_code": "piazza",
+        "market_name_en": "Piazza",
+        "latitude": 9.0356,
+        "longitude": 38.7522,
+        "status": "published",
+        "heat": 4.1,
+        "band": "warm",
+        "cells_published": 4,
+        "cells_expected": 5,
+        "cells": [
+          {
+            "commodity_code": "teff_mixed",
+            "status": "published",
+            "value": 121.77,
+            "pct_change": 3.6,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "wheat",
+            "status": "published",
+            "value": 73.58,
+            "pct_change": 2.0,
+            "band": "warm"
+          },
+          {
+            "commodity_code": "maize",
+            "status": "insufficient_data",
+            "value": null,
+            "pct_change": null,
+            "band": null
+          },
+          {
+            "commodity_code": "onion",
+            "status": "published",
+            "value": 59.98,
+            "pct_change": 8.2,
+            "band": "hot"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "status": "published",
+            "value": 214.43,
+            "pct_change": 3.9,
+            "band": "warm"
+          }
+        ]
+      }
+    ],
+    "hottest_cell": {
+      "market_code": "atikilt_tera",
+      "commodity_code": "onion",
+      "pct_change": 34.9
+    }
+  }
+}

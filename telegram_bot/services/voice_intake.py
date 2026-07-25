@@ -49,7 +49,7 @@ async def transcribe_message_audio(
             wav_path = Path(tmp) / "input.wav"
             if not _convert_to_wav(raw_path, wav_path):
                 raise AddisSTTError(
-                    "Could not convert voice note for Addis AI. "
+                    "Could not read that voice note. "
                     "Please send again, or type the market name."
                 )
             send_path = wav_path

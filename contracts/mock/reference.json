@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-index-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "city": {
+      "code": "addis_ababa",
+      "name_en": "Addis Ababa",
+      "name_am": "አዲስ አበባ"
+    },
+    "markets": [
+      {
+        "code": "merkato",
+        "name_en": "Merkato",
+        "name_am": "መርካቶ",
+        "latitude": 9.0341,
+        "longitude": 38.7395,
+        "is_active": true
+      },
+      {
+        "code": "ehil_berenda",
+        "name_en": "Ehil Berenda",
+        "name_am": "እህል በረንዳ",
+        "latitude": 9.0333,
+        "longitude": 38.7389,
+        "is_active": true
+      },
+      {
+        "code": "atikilt_tera",
+        "name_en": "Atikilt Tera",
+        "name_am": "አትክልት ተራ",
+        "latitude": 9.03,
+        "longitude": 38.745,
+        "is_active": true
+      },
+      {
+        "code": "asko",
+        "name_en": "Asko",
+        "name_am": "አስኮ",
+        "latitude": 9.0489,
+        "longitude": 38.6889,
+        "is_active": true
+      },
+      {
+        "code": "saris",
+        "name_en": "Saris",
+        "name_am": "ሳሪስ",
+        "latitude": 8.9797,
+        "longitude": 38.7622,
+        "is_active": true
+      },
+      {
+        "code": "akaki",
+        "name_en": "Akaki",
+        "name_am": "አቃቂ",
+        "latitude": 8.8939,
+        "longitude": 38.8069,
+        "is_active": true
+      },
+      {
+        "code": "kera",
+        "name_en": "Kera",
+        "name_am": "ቄራ",
+        "latitude": 8.9994,
+        "longitude": 38.7481,
+        "is_active": true
+      },
+      {
+        "code": "shola",
+        "name_en": "Shola Gebeya",
+        "name_am": "ሾላ ገበያ",
+        "latitude": 9.0244,
+        "longitude": 38.7986,
+        "is_active": true
+      },
+      {
+        "code": "piazza",
+        "name_en": "Piazza",
+        "name_am": "ፒያሳ",
+        "latitude": 9.0356,
+        "longitude": 38.7522,
+        "is_active": true
+      }
+    ],
+    "commodities": [
+      {
+        "code": "teff_mixed",
+        "name_en": "Teff (mixed)",
+        "name_am": "ጤፍ (ድብልቅ)",
+        "category": "cereals and tubers",
+        "unit": "kg",
+        "price_hint_low": 80,
+        "price_hint_high": 160
+      },
+      {
+        "code": "wheat",
+        "name_en": "Wheat",
+        "name_am": "ስንዴ",
+        "category": "cereals and tubers",
+        "unit": "kg",
+        "price_hint_low": 45,
+        "price_hint_high": 90
+      },
+      {
+        "code": "maize",
+        "name_en": "Maize",
+        "name_am": "በቆሎ",
+        "category": "cereals and tubers",
+        "unit": "kg",
+        "price_hint_low": 28,
+        "price_hint_high": 60
+      },
+      {
+        "code": "onion",
+        "name_en": "Onion",
+        "name_am": "ሽንኩርት",
+        "category": "vegetables and fruits",
+        "unit": "kg",
+        "price_hint_low": 25,
+        "price_hint_high": 80
+      },
+      {
+        "code": "cooking_oil",
+        "name_en": "Cooking oil",
+        "name_am": "የምግብ ዘይት",
+        "category": "oil and fats",
+        "unit": "liter",
+        "price_hint_low": 120,
+        "price_hint_high": 260
+      }
+    ],
+    "baskets": [
+      {
+        "code": "phase1_staple5",
+        "name_en": "Addis staple basket (5 items)",
+        "household_size": 5,
+        "period_days": 30,
+        "items": [
+          {
+            "commodity_code": "teff_mixed",
+            "quantity": 25,
+            "unit": "kg"
+          },
+          {
+            "commodity_code": "wheat",
+            "quantity": 10,
+            "unit": "kg"
+          },
+          {
+            "commodity_code": "maize",
+            "quantity": 10,
+            "unit": "kg"
+          },
+          {
+            "commodity_code": "onion",
+            "quantity": 6,
+            "unit": "kg"
+          },
+          {
+            "commodity_code": "cooking_oil",
+            "quantity": 3,
+            "unit": "liter"
+          }
+        ]
+      }
+    ]
+  }
+}

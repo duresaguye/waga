@@ -38,7 +38,14 @@ Phase 1 structured intake bot lives in `telegram_bot/`. See `docs/telegram-bot.m
 uv run waga-telegram-bot
 ```
 
-Default `WAGA_TELEGRAM_DRY_RUN=true` logs submissions until the API route exists.
+Default `WAGA_TELEGRAM_DRY_RUN=true` logs submissions locally. Set `false` for live API.
+
+## Deploy (Render + GitHub)
+
+See [`docs/deploy-render.md`](docs/deploy-render.md). Blueprint: [`render.yaml`](render.yaml)
+
+- Web: API (`scripts/start-api.sh`, uses `$PORT`, migrates on release)
+- Worker: Telegram bot (`scripts/start-bot.sh`)
 
 ## Quality checks
 

@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-business-copilot-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "answer": "Budget 40,296–47,725 ETB a month for 400kg of teff at current prices. Buy at Ehil Berenda, where teff published at 100.74 ETB/kg today against a city median of 113.63 — about 5,156 ETB a month cheaper. Teff has risen 18.0% in 30 days and 30-day volatility is 4.9%, so this is not a good week to lock a six-month fixed price.",
+    "verdict": {
+      "action": "source_at_alternative_market",
+      "confidence": "high",
+      "confidence_reason": "Teff published in 8 of 9 markets in the last 72h."
+    },
+    "drivers": [
+      {
+        "label": "Teff 30-day change",
+        "value": 18.0,
+        "unit": "%",
+        "direction": "up"
+      },
+      {
+        "label": "Teff 30-day volatility",
+        "value": 4.9,
+        "unit": "%",
+        "direction": "up"
+      },
+      {
+        "label": "Cheapest vs city median",
+        "value": -11.3,
+        "unit": "%",
+        "direction": "down"
+      }
+    ],
+    "citations": [
+      {
+        "label": "Ehil Berenda teff",
+        "value": 100.74,
+        "unit": "ETB/kg",
+        "source": "/prices/current",
+        "cell_refs": [
+          "ehil_berenda:teff_mixed:2026-07-25"
+        ]
+      },
+      {
+        "label": "Addis teff median",
+        "value": 113.63,
+        "unit": "ETB/kg",
+        "source": "/prices/current",
+        "cell_refs": [
+          "addis_ababa:teff_mixed:2026-07-25"
+        ]
+      }
+    ],
+    "mode": "rule_based"
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-spike-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "method_version": "waga-spike-v1",
+    "alps_comparable": false,
+    "alps_comparable_note": "Detrended residual z-score over a 30-day daily window, banded jointly with the percent deviation from trend. Same structure as WFP ALPS but daily rather than monthly. Real ALPS needs 24 monthly observations per cell.",
+    "window_days": 30,
+    "min_deviation_pct": 2.0,
+    "z_thresholds": [
+      1.0,
+      2.0,
+      3.0
+    ],
+    "deviation_thresholds_pct": [
+      2.0,
+      5.0,
+      10.0
+    ],
+    "alerts": [
+      {
+        "market_code": "atikilt_tera",
+        "commodity_code": "onion",
+        "spike": 3.55,
+        "band": "crisis",
+        "value": 60.91,
+        "expected": 51.92,
+        "median_30d": 41.91,
+        "pct_above_expected": 17.3,
+        "first_detected_at": "2026-07-23T06:00:00Z",
+        "consecutive_days": 3
+      },
+      {
+        "market_code": "saris",
+        "commodity_code": "wheat",
+        "spike": 2.36,
+        "band": "stress",
+        "value": 69.21,
+        "expected": 67.83,
+        "median_30d": 63.9,
+        "pct_above_expected": 2.0,
+        "first_detected_at": "2026-07-24T06:00:00Z",
+        "consecutive_days": 2
+      },
+      {
+        "market_code": "kera",
+        "commodity_code": "maize",
+        "spike": 2.17,
+        "band": "alert",
+        "value": 51.43,
+        "expected": 48.11,
+        "median_30d": 43.05,
+        "pct_above_expected": 6.9,
+        "first_detected_at": "2026-07-22T06:00:00Z",
+        "consecutive_days": 4
+      },
+      {
+        "market_code": "akaki",
+        "commodity_code": "wheat",
+        "spike": 2.0,
+        "band": "stress",
+        "value": 69.38,
+        "expected": 67.9,
+        "median_30d": 64.26,
+        "pct_above_expected": 2.2,
+        "first_detected_at": "2026-07-25T06:00:00Z",
+        "consecutive_days": 1
+      }
+    ]
+  }
+}

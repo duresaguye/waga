@@ -1,0 +1,67 @@
+# Render Blueprint — deploy API + Telegram bot from GitHub.
+# Docs: docs/deploy-render.md
+#
+# Dashboard: New → Blueprint → connect https://github.com/duresaguye/waga
+# Set secret env vars marked sync: false after create.
+
+services:
+  - type: web
+    name: waga-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: ./scripts/start-api.sh
+    preDeployCommand: ./scripts/migrate.sh
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: WAGA_ENVIRONMENT
+        value: production
+      - key: WAGA_DEBUG
+        value: "false"
+      - key: WAGA_JWT_ISSUER
+        value: waga-index
+      - key: WAGA_JWT_AUDIENCE
+        value: waga-api
+      - key: WAGA_REVIEW_AI_ENABLED
+        value: "true"
+      - key: WAGA_ADDIS_AI_CHAT_URL
+        value: https://api.addisassistant.com/api/v1/chat_generate
+      - key: WAGA_ADDIS_AI_DEFAULT_LANG
+        value: am
+      - key: WAGA_DATABASE_URL
+        sync: false
+      - key: WAGA_JWT_SECRET_KEY
+        sync: false
+      - key: WAGA_ADDIS_AI_API_KEY
+        sync: false
+
+  - type: worker
+    name: waga-telegram-bot
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: ./scripts/start-bot.sh
+    envVars:
+      - key: WAGA_ENVIRONMENT
+        value: production
+      - key: WAGA_TELEGRAM_DRY_RUN
+        value: "false"
+      - key: WAGA_TELEGRAM_REQUIRE_AGENT
+        value: "true"
+      - key: WAGA_TELEGRAM_AGENT_INVITE_CODES
+        value: WAGA-ADDIS-01
+      - key: WAGA_TELEGRAM_HELP_PHONE
+        value: "+251994445412"
+      - key: WAGA_ADDIS_AI_STT_URL
+        value: https://api.addisassistant.com/api/v2/stt
+      - key: WAGA_ADDIS_AI_DEFAULT_LANG
+        value: am
+      - key: WAGA_API_EXTERNAL_URL
+        fromService:
+          name: waga-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: WAGA_TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: WAGA_ADDIS_AI_API_KEY
+        sync: false
+      - key: WAGA_TELEGRAM_AGENT_IDS
+        sync: false

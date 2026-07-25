@@ -29,6 +29,21 @@ class Settings(BaseSettings):
     password_min_length: int = 8
     password_max_length: int = 128
 
+    # Addis AI — voice STT (bot) + review assist LLM (API)
+    addis_ai_api_key: SecretStr | None = None
+    addis_ai_chat_url: str = "https://api.addisassistant.com/api/v1/chat_generate"
+    addis_ai_default_lang: str = "am"
+    review_ai_enabled: bool = True
+
+    @field_validator("addis_ai_api_key", mode="before")
+    @classmethod
+    def empty_addis_key_as_none(cls, value: object) -> object:
+        if value is None:
+            return None
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
     @field_validator("database_url", mode="before")
     @classmethod
     def use_asyncpg_driver(cls, value: object) -> object:
@@ -64,7 +79,16 @@ class Settings(BaseSettings):
             raise ValueError("WAGA_JWT_ISSUER must not be blank")
         if not self.jwt_audience.strip():
             raise ValueError("WAGA_JWT_AUDIENCE must not be blank")
+        if not self.addis_ai_chat_url.strip():
+            raise ValueError("WAGA_ADDIS_AI_CHAT_URL must not be blank")
         return self
+
+    def addis_chat_enabled(self) -> bool:
+        return (
+            self.review_ai_enabled
+            and self.addis_ai_api_key is not None
+            and bool(self.addis_ai_api_key.get_secret_value().strip())
+        )
 
 
 @lru_cache

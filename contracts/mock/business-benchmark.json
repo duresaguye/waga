@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-benchmark-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "commodity_code": "teff_mixed",
+    "quoted_price": 130.0,
+    "city_median": 113.63,
+    "diff_pct": 14.4,
+    "percentile": 100,
+    "verdict": "above_market",
+    "message": "This quote is 14.4% above the Addis median and higher than 100% of prices recorded in the last 30 days. Ehil Berenda published 100.74 ETB/kg today.",
+    "cheapest_alternative": {
+      "market_code": "ehil_berenda",
+      "value": 100.74
+    }
+  }
+}

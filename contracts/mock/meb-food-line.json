@@ -1,0 +1,38 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-index-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "household_size": 5,
+    "waga_food_line_now": 4923.64,
+    "waga_food_line_prior": 4142.35,
+    "change_pct": 18.9,
+    "coverage_note": "Waga prices 5 of the 53 ECWG MEB items. This is the tracked-staple line only.",
+    "ecwg_reference": {
+      "source": "ECWG MEB National Reference Guide, June 2025",
+      "national_meb_full_etb": 17700.0,
+      "national_meb_food_etb": 16135.0,
+      "as_of": "2025-12-01",
+      "review_cadence_months": 3,
+      "revision_trigger": "Six consecutive months of price movement in one direction"
+    },
+    "consecutive_months_rising": 4,
+    "revision_trigger_met": false
+  }
+}

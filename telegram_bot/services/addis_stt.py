@@ -43,7 +43,7 @@ class AddisSTTClient:
     ) -> TranscriptionResult:
         if not self.enabled:
             raise AddisSTTError(
-                "Addis AI is not configured. Set WAGA_ADDIS_AI_API_KEY in .env"
+                "Voice is unavailable right now. Please type the market name instead."
             )
 
         lang = (language_code or self._settings.addis_ai_default_lang).strip().lower()
@@ -70,13 +70,15 @@ class AddisSTTClient:
                 response.text[:500],
             )
             raise AddisSTTError(
-                f"Addis AI STT failed ({response.status_code}). Please send the voice note again."
+                "Could not read that voice note. Please send it again, or type the name."
             )
 
         payload = response.json()
         text = _extract_text(payload)
         if not text:
-            raise AddisSTTError("Addis AI returned empty transcription.")
+            raise AddisSTTError(
+                "I could not hear a clear market name. Please try again or type it."
+            )
 
         confidence = payload.get("confidence")
         if confidence is not None:

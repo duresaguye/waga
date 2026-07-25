@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.dependencies import get_submission_service
+from app.dependencies import get_review_service, get_submission_service
 from app.schemas.submissions import (
     SubmissionCreate,
     SubmissionCreateResponse,
@@ -13,6 +13,7 @@ from app.services.exceptions import (
     SubmissionConflictError,
     SubmissionValidationError,
 )
+from app.services.reviews import ReviewService
 from app.services.submissions import SubmissionService
 
 router = APIRouter(prefix="/submissions", tags=["submissions"])
@@ -26,6 +27,7 @@ router = APIRouter(prefix="/submissions", tags=["submissions"])
 async def create_submission(
     body: SubmissionCreate,
     service: Annotated[SubmissionService, Depends(get_submission_service)],
+    reviews: Annotated[ReviewService, Depends(get_review_service)],
 ) -> SubmissionCreateResponse:
     """Create a pending price report (Telegram bot / structured clients)."""
     try:
@@ -49,6 +51,9 @@ async def create_submission(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=str(error)) from error
     except SubmissionConflictError as error:
         raise HTTPException(status.HTTP_409_CONFLICT, detail=str(error)) from error
+
+    # Best-effort AI assist; never blocks create.
+    await reviews.triage_after_create(submission.id)
 
     ban_reason = score.get("ban_reason")
     return SubmissionCreateResponse(

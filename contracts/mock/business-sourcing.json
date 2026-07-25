@@ -1,0 +1,485 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-index-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "commodities": [
+      {
+        "commodity_code": "teff_mixed",
+        "unit": "kg",
+        "city_median": 113.63,
+        "cheapest": {
+          "market_code": "ehil_berenda",
+          "value": 100.74,
+          "n_submissions": 7
+        },
+        "dearest": {
+          "market_code": "shola",
+          "value": 122.04,
+          "n_submissions": 8
+        },
+        "spread_pct": 21.1,
+        "saving_per_unit_etb": 12.89,
+        "volatility_30d_pct": 4.9,
+        "markets": [
+          {
+            "market_code": "merkato",
+            "market_name_en": "Merkato",
+            "status": "published",
+            "value": 108.36,
+            "diff_from_median_pct": -4.6,
+            "n_submissions": 6
+          },
+          {
+            "market_code": "ehil_berenda",
+            "market_name_en": "Ehil Berenda",
+            "status": "published",
+            "value": 100.74,
+            "diff_from_median_pct": -11.3,
+            "n_submissions": 7
+          },
+          {
+            "market_code": "atikilt_tera",
+            "market_name_en": "Atikilt Tera",
+            "status": "published",
+            "value": 110.2,
+            "diff_from_median_pct": -3.0,
+            "n_submissions": 3
+          },
+          {
+            "market_code": "asko",
+            "market_name_en": "Asko",
+            "status": "published",
+            "value": 112.43,
+            "diff_from_median_pct": -1.1,
+            "n_submissions": 4
+          },
+          {
+            "market_code": "saris",
+            "market_name_en": "Saris",
+            "status": "published",
+            "value": 114.83,
+            "diff_from_median_pct": 1.1,
+            "n_submissions": 9
+          },
+          {
+            "market_code": "akaki",
+            "market_name_en": "Akaki",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 1
+          },
+          {
+            "market_code": "kera",
+            "market_name_en": "Kera",
+            "status": "published",
+            "value": 115.7,
+            "diff_from_median_pct": 1.8,
+            "n_submissions": 7
+          },
+          {
+            "market_code": "shola",
+            "market_name_en": "Shola Gebeya",
+            "status": "published",
+            "value": 122.04,
+            "diff_from_median_pct": 7.4,
+            "n_submissions": 8
+          },
+          {
+            "market_code": "piazza",
+            "market_name_en": "Piazza",
+            "status": "published",
+            "value": 121.77,
+            "diff_from_median_pct": 7.2,
+            "n_submissions": 6
+          }
+        ]
+      },
+      {
+        "commodity_code": "wheat",
+        "unit": "kg",
+        "city_median": 69.21,
+        "cheapest": {
+          "market_code": "merkato",
+          "value": 62.42,
+          "n_submissions": 5
+        },
+        "dearest": {
+          "market_code": "piazza",
+          "value": 73.58,
+          "n_submissions": 8
+        },
+        "spread_pct": 17.9,
+        "saving_per_unit_etb": 6.79,
+        "volatility_30d_pct": 3.7,
+        "markets": [
+          {
+            "market_code": "merkato",
+            "market_name_en": "Merkato",
+            "status": "published",
+            "value": 62.42,
+            "diff_from_median_pct": -9.8,
+            "n_submissions": 5
+          },
+          {
+            "market_code": "ehil_berenda",
+            "market_name_en": "Ehil Berenda",
+            "status": "published",
+            "value": 65.79,
+            "diff_from_median_pct": -4.9,
+            "n_submissions": 8
+          },
+          {
+            "market_code": "atikilt_tera",
+            "market_name_en": "Atikilt Tera",
+            "status": "published",
+            "value": 67.06,
+            "diff_from_median_pct": -3.1,
+            "n_submissions": 3
+          },
+          {
+            "market_code": "asko",
+            "market_name_en": "Asko",
+            "status": "published",
+            "value": 67.9,
+            "diff_from_median_pct": -1.9,
+            "n_submissions": 5
+          },
+          {
+            "market_code": "saris",
+            "market_name_en": "Saris",
+            "status": "published",
+            "value": 69.21,
+            "diff_from_median_pct": 0.0,
+            "n_submissions": 3
+          },
+          {
+            "market_code": "akaki",
+            "market_name_en": "Akaki",
+            "status": "published",
+            "value": 69.38,
+            "diff_from_median_pct": 0.2,
+            "n_submissions": 9
+          },
+          {
+            "market_code": "kera",
+            "market_name_en": "Kera",
+            "status": "published",
+            "value": 69.73,
+            "diff_from_median_pct": 0.8,
+            "n_submissions": 7
+          },
+          {
+            "market_code": "shola",
+            "market_name_en": "Shola Gebeya",
+            "status": "published",
+            "value": 72.25,
+            "diff_from_median_pct": 4.4,
+            "n_submissions": 3
+          },
+          {
+            "market_code": "piazza",
+            "market_name_en": "Piazza",
+            "status": "published",
+            "value": 73.58,
+            "diff_from_median_pct": 6.3,
+            "n_submissions": 8
+          }
+        ]
+      },
+      {
+        "commodity_code": "maize",
+        "unit": "kg",
+        "city_median": 43.97,
+        "cheapest": {
+          "market_code": "merkato",
+          "value": 40.83,
+          "n_submissions": 6
+        },
+        "dearest": {
+          "market_code": "kera",
+          "value": 51.43,
+          "n_submissions": 4
+        },
+        "spread_pct": 26.0,
+        "saving_per_unit_etb": 3.14,
+        "volatility_30d_pct": 2.9,
+        "markets": [
+          {
+            "market_code": "merkato",
+            "market_name_en": "Merkato",
+            "status": "published",
+            "value": 40.83,
+            "diff_from_median_pct": -7.1,
+            "n_submissions": 6
+          },
+          {
+            "market_code": "ehil_berenda",
+            "market_name_en": "Ehil Berenda",
+            "status": "published",
+            "value": 42.48,
+            "diff_from_median_pct": -3.4,
+            "n_submissions": 4
+          },
+          {
+            "market_code": "atikilt_tera",
+            "market_name_en": "Atikilt Tera",
+            "status": "published",
+            "value": 43.4,
+            "diff_from_median_pct": -1.3,
+            "n_submissions": 5
+          },
+          {
+            "market_code": "asko",
+            "market_name_en": "Asko",
+            "status": "published",
+            "value": 44.29,
+            "diff_from_median_pct": 0.7,
+            "n_submissions": 6
+          },
+          {
+            "market_code": "saris",
+            "market_name_en": "Saris",
+            "status": "published",
+            "value": 43.66,
+            "diff_from_median_pct": -0.7,
+            "n_submissions": 8
+          },
+          {
+            "market_code": "akaki",
+            "market_name_en": "Akaki",
+            "status": "published",
+            "value": 44.47,
+            "diff_from_median_pct": 1.1,
+            "n_submissions": 8
+          },
+          {
+            "market_code": "kera",
+            "market_name_en": "Kera",
+            "status": "published",
+            "value": 51.43,
+            "diff_from_median_pct": 17.0,
+            "n_submissions": 4
+          },
+          {
+            "market_code": "shola",
+            "market_name_en": "Shola Gebeya",
+            "status": "published",
+            "value": 46.05,
+            "diff_from_median_pct": 4.7,
+            "n_submissions": 8
+          },
+          {
+            "market_code": "piazza",
+            "market_name_en": "Piazza",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 2
+          }
+        ]
+      },
+      {
+        "commodity_code": "onion",
+        "unit": "kg",
+        "city_median": 56.51,
+        "cheapest": {
+          "market_code": "ehil_berenda",
+          "value": 53.58,
+          "n_submissions": 4
+        },
+        "dearest": {
+          "market_code": "shola",
+          "value": 61.0,
+          "n_submissions": 4
+        },
+        "spread_pct": 13.8,
+        "saving_per_unit_etb": 2.93,
+        "volatility_30d_pct": 10.0,
+        "markets": [
+          {
+            "market_code": "merkato",
+            "market_name_en": "Merkato",
+            "status": "published",
+            "value": 53.69,
+            "diff_from_median_pct": -5.0,
+            "n_submissions": 5
+          },
+          {
+            "market_code": "ehil_berenda",
+            "market_name_en": "Ehil Berenda",
+            "status": "published",
+            "value": 53.58,
+            "diff_from_median_pct": -5.2,
+            "n_submissions": 4
+          },
+          {
+            "market_code": "atikilt_tera",
+            "market_name_en": "Atikilt Tera",
+            "status": "published",
+            "value": 60.91,
+            "diff_from_median_pct": 7.8,
+            "n_submissions": 6
+          },
+          {
+            "market_code": "asko",
+            "market_name_en": "Asko",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 2
+          },
+          {
+            "market_code": "saris",
+            "market_name_en": "Saris",
+            "status": "published",
+            "value": 55.95,
+            "diff_from_median_pct": -1.0,
+            "n_submissions": 5
+          },
+          {
+            "market_code": "akaki",
+            "market_name_en": "Akaki",
+            "status": "published",
+            "value": 55.42,
+            "diff_from_median_pct": -1.9,
+            "n_submissions": 5
+          },
+          {
+            "market_code": "kera",
+            "market_name_en": "Kera",
+            "status": "published",
+            "value": 57.07,
+            "diff_from_median_pct": 1.0,
+            "n_submissions": 3
+          },
+          {
+            "market_code": "shola",
+            "market_name_en": "Shola Gebeya",
+            "status": "published",
+            "value": 61.0,
+            "diff_from_median_pct": 7.9,
+            "n_submissions": 4
+          },
+          {
+            "market_code": "piazza",
+            "market_name_en": "Piazza",
+            "status": "published",
+            "value": 59.98,
+            "diff_from_median_pct": 6.1,
+            "n_submissions": 5
+          }
+        ]
+      },
+      {
+        "commodity_code": "cooking_oil",
+        "unit": "liter",
+        "city_median": 204.01,
+        "cheapest": {
+          "market_code": "atikilt_tera",
+          "value": 184.62,
+          "n_submissions": 7
+        },
+        "dearest": {
+          "market_code": "piazza",
+          "value": 214.43,
+          "n_submissions": 5
+        },
+        "spread_pct": 16.1,
+        "saving_per_unit_etb": 19.39,
+        "volatility_30d_pct": 6.4,
+        "markets": [
+          {
+            "market_code": "merkato",
+            "market_name_en": "Merkato",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 1
+          },
+          {
+            "market_code": "ehil_berenda",
+            "market_name_en": "Ehil Berenda",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 0
+          },
+          {
+            "market_code": "atikilt_tera",
+            "market_name_en": "Atikilt Tera",
+            "status": "published",
+            "value": 184.62,
+            "diff_from_median_pct": -9.5,
+            "n_submissions": 7
+          },
+          {
+            "market_code": "asko",
+            "market_name_en": "Asko",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 2
+          },
+          {
+            "market_code": "saris",
+            "market_name_en": "Saris",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 0
+          },
+          {
+            "market_code": "akaki",
+            "market_name_en": "Akaki",
+            "status": "published",
+            "value": 204.01,
+            "diff_from_median_pct": 0.0,
+            "n_submissions": 9
+          },
+          {
+            "market_code": "kera",
+            "market_name_en": "Kera",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 0
+          },
+          {
+            "market_code": "shola",
+            "market_name_en": "Shola Gebeya",
+            "status": "insufficient_data",
+            "value": null,
+            "diff_from_median_pct": null,
+            "n_submissions": 1
+          },
+          {
+            "market_code": "piazza",
+            "market_name_en": "Piazza",
+            "status": "published",
+            "value": 214.43,
+            "diff_from_median_pct": 5.1,
+            "n_submissions": 5
+          }
+        ]
+      }
+    ]
+  }
+}

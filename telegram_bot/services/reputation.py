@@ -116,20 +116,13 @@ class ReputationStore:
             else f"Redeem from {REDEEM_THRESHOLD} points"
         )
         lines = [
-            "📊 Agent score",
+            "Agent score",
             f"• Score: {profile.score}",
             f"• Status: {profile.status_label()}",
-            f"• Pending review: {profile.pending_count}",
-            f"• Accepted reports: {profile.accepted_count}",
-            f"• Flagged: {profile.flagged_count}",
+            f"• Reports sent: {profile.pending_count + profile.accepted_count}",
+            f"• Accepted: {profile.accepted_count}",
             f"• Redeemed so far: {profile.redeemed_total}",
             f"• {redeem_line}",
-            "",
-            "How score works:",
-            f"• Accepted report: +{POINTS_ACCEPT}",
-            f"• Flagged report: {POINTS_FLAG}",
-            f"• Redeem at {REDEEM_THRESHOLD}+ points",
-            "• False reports can lead to a ban",
         ]
         if profile.banned:
             lines.extend(

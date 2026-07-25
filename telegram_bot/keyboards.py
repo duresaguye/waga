@@ -161,18 +161,32 @@ def voice_label_confirm_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboard
         [
             [InlineKeyboardButton("Use this name — continue", callback_data=f"{prefix}:yes")],
             [InlineKeyboardButton("Record again", callback_data=f"{prefix}:retry")],
+            [InlineKeyboardButton("Type instead", callback_data=f"{prefix}:type")],
         ]
     )
 
 
 def other_market_prompt_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
+    cancel = "cancel" if prefix == "voice_mkt" else "apply_cancel"
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Type the name", callback_data=f"{prefix}:mode:type")],
+            [InlineKeyboardButton("Record voice", callback_data=f"{prefix}:mode:voice")],
+            [InlineKeyboardButton("Cancel", callback_data=cancel)],
+        ]
+    )
+
+
+def other_market_voice_lang_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
+    cancel = "cancel" if prefix == "voice_mkt" else "apply_cancel"
     return InlineKeyboardMarkup(
         [
             [
-                InlineKeyboardButton("Amharic voice", callback_data=f"{prefix}:lang:am"),
-                InlineKeyboardButton("Oromo voice", callback_data=f"{prefix}:lang:om"),
+                InlineKeyboardButton("Amharic", callback_data=f"{prefix}:lang:am"),
+                InlineKeyboardButton("Afaan Oromo", callback_data=f"{prefix}:lang:om"),
             ],
-            [InlineKeyboardButton("Cancel", callback_data="cancel" if prefix == "voice_mkt" else "apply_cancel")],
+            [InlineKeyboardButton("Back", callback_data=f"{prefix}:mode:choose")],
+            [InlineKeyboardButton("Cancel", callback_data=cancel)],
         ]
     )
 

@@ -96,3 +96,11 @@ class SubmissionValidationError(SubmissionError):
 
 class SubmissionConflictError(SubmissionError):
     pass
+
+
+class SubmissionNotFoundError(SubmissionError):
+    pass
+
+
+class ReviewConflictError(SubmissionError):
+    pass

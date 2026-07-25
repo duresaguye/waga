@@ -1,0 +1,67 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-copilot-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "answer": "The Addis staple basket rose from 4,142 to 4,924 ETB over the last 30 days, an increase of 18.9%. Teff accounts for 55.4% of that increase. A transfer value set against last month's basket now covers roughly 84% of the same goods. An adjustment of 15–19% would restore purchasing power.",
+    "recommendation": {
+      "action": "increase_transfer_value",
+      "band_low_pct": 15.0,
+      "band_high_pct": 19.0,
+      "confidence": "medium",
+      "confidence_reason": "36 of 45 cells published in the last 72h; cooking oil coverage is thin."
+    },
+    "citations": [
+      {
+        "label": "Basket cost now",
+        "value": 4923.64,
+        "unit": "ETB",
+        "source": "/affordability",
+        "cell_refs": [
+          "addis_ababa:phase1_staple5:2026-07-25"
+        ]
+      },
+      {
+        "label": "Basket cost 30 days ago",
+        "value": 4142.35,
+        "unit": "ETB",
+        "source": "/affordability",
+        "cell_refs": [
+          "addis_ababa:phase1_staple5:2026-06-25"
+        ]
+      },
+      {
+        "label": "Teff city median",
+        "value": 113.63,
+        "unit": "ETB/kg",
+        "source": "/prices/current",
+        "cell_refs": [
+          "addis_ababa:teff_mixed:2026-07-25"
+        ]
+      }
+    ],
+    "impact": {
+      "household_count": 50000,
+      "gap_per_household_etb": 781.29,
+      "monthly_total_etb": 39064500.0,
+      "note": "Cost of leaving the transfer value unchanged for one month."
+    },
+    "mode": "rule_based"
+  }
+}
