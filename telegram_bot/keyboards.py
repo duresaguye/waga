@@ -1,0 +1,250 @@
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
+
+from telegram_bot.reference import COMMODITIES, MARKETS
+
+
+def consent_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("እስማማለሁ / I agree", callback_data="consent:yes"),
+            ],
+            [
+                InlineKeyboardButton("አልስማማም / Decline", callback_data="consent:no"),
+            ],
+        ]
+    )
+
+
+def markets_keyboard() -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                f"{market.name_am} / {market.name_en}",
+                callback_data=f"market:{market.code}",
+            )
+        ]
+        for market in MARKETS
+    ]
+    rows.append([InlineKeyboardButton("Cancel", callback_data="cancel")])
+    return InlineKeyboardMarkup(rows)
+
+
+def commodities_keyboard() -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                f"{commodity.name_am} / {commodity.name_en}",
+                callback_data=f"commodity:{commodity.code}",
+            )
+        ]
+        for commodity in COMMODITIES
+    ]
+    rows.append([InlineKeyboardButton("Cancel", callback_data="cancel")])
+    return InlineKeyboardMarkup(rows)
+
+
+def confirm_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Confirm ✅", callback_data="confirm:yes"),
+                InlineKeyboardButton("Edit price", callback_data="confirm:edit_price"),
+            ],
+            [InlineKeyboardButton("Cancel", callback_data="cancel")],
+        ]
+    )
+
+
+def guest_menu_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        [
+            ["Apply to be agent", "Enter invite code"],
+            ["Help"],
+        ],
+        resize_keyboard=True,
+    )
+
+
+def agent_menu_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        [
+            ["Submit price", "My score"],
+            ["Redeem score", "Help"],
+        ],
+        resize_keyboard=True,
+    )
+
+def main_menu_keyboard(*, is_agent: bool = False) -> ReplyKeyboardMarkup:
+    return agent_menu_keyboard() if is_agent else guest_menu_keyboard()
+
+
+def guest_actions_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Apply to be agent", callback_data="ui:apply")],
+            [InlineKeyboardButton("Enter invite code", callback_data="ui:enter_code")],
+            [InlineKeyboardButton("How to join", callback_data="ui:how_to_join")],
+        ]
+    )
+
+
+def apply_market_keyboard() -> InlineKeyboardMarkup:
+    rows = [
+        [
+            InlineKeyboardButton(
+                f"{market.name_am} / {market.name_en}",
+                callback_data=f"apply_market:{market.code}",
+            )
+        ]
+        for market in MARKETS
+    ]
+    rows.append(
+        [InlineKeyboardButton("Either / flexible", callback_data="apply_market:either")]
+    )
+    rows.append([InlineKeyboardButton("Cancel", callback_data="apply_cancel")])
+    return InlineKeyboardMarkup(rows)
+
+
+def apply_frequency_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Daily", callback_data="apply_freq:daily")],
+            [
+                InlineKeyboardButton(
+                    "Few times a week", callback_data="apply_freq:few_times_week"
+                )
+            ],
+            [InlineKeyboardButton("Weekends", callback_data="apply_freq:weekends")],
+            [InlineKeyboardButton("Cancel", callback_data="apply_cancel")],
+        ]
+    )
+
+
+def apply_consent_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton(
+                    "I agree — real market prices only",
+                    callback_data="apply_consent:yes",
+                )
+            ],
+            [InlineKeyboardButton("Cancel", callback_data="apply_cancel")],
+        ]
+    )
+
+
+def apply_confirm_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Submit application ✅", callback_data="apply_confirm:yes"),
+                InlineKeyboardButton("Cancel", callback_data="apply_cancel"),
+            ]
+        ]
+    )
+
+
+def score_actions_keyboard(*, can_redeem: bool) -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    if can_redeem:
+        rows.append(
+            [InlineKeyboardButton("🎁 Redeem score", callback_data="ui:redeem")]
+        )
+    rows.append([InlineKeyboardButton("📤 Submit price", callback_data="ui:submit")])
+    return InlineKeyboardMarkup(rows)
+
+
+def voice_label_confirm_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Use this name — continue", callback_data=f"{prefix}:yes")],
+            [InlineKeyboardButton("Record again", callback_data=f"{prefix}:retry")],
+        ]
+    )
+
+
+def other_market_prompt_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [
+                InlineKeyboardButton("Amharic voice", callback_data=f"{prefix}:lang:am"),
+                InlineKeyboardButton("Oromo voice", callback_data=f"{prefix}:lang:om"),
+            ],
+            [InlineKeyboardButton("Cancel", callback_data="cancel" if prefix == "voice_mkt" else "apply_cancel")],
+        ]
+    )
+
+
+ADDIS_SUBCITIES: tuple[str, ...] = (
+    "Addis Ketema",
+    "Arada",
+    "Bole",
+    "Gulele",
+    "Kirkos",
+    "Kolfe Keranio",
+    "Lideta",
+    "Nifas Silk-Lafto",
+    "Yeka",
+    "Akaky Kaliti",
+    "Lemi Kura",
+)
+
+
+def apply_city_keyboard() -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("Addis Ababa", callback_data="apply_city:addis_ababa")],
+            [InlineKeyboardButton("Other city (type)", callback_data="apply_city:other")],
+            [InlineKeyboardButton("Cancel", callback_data="apply_cancel")],
+        ]
+    )
+
+
+def apply_subcity_keyboard() -> InlineKeyboardMarkup:
+    rows: list[list[InlineKeyboardButton]] = []
+    row: list[InlineKeyboardButton] = []
+    for name in ADDIS_SUBCITIES:
+        code = name.lower().replace(" ", "_").replace("-", "_")
+        row.append(InlineKeyboardButton(name, callback_data=f"apply_subcity:{code}"))
+        if len(row) == 2:
+            rows.append(row)
+            row = []
+    if row:
+        rows.append(row)
+    rows.append(
+        [
+            InlineKeyboardButton("Skip", callback_data="apply_subcity:skip"),
+            InlineKeyboardButton("Other (type)", callback_data="apply_subcity:other"),
+        ]
+    )
+    rows.append([InlineKeyboardButton("Cancel", callback_data="apply_cancel")])
+    return InlineKeyboardMarkup(rows)
+
+
+def apply_languages_keyboard(selected: set[str] | None = None) -> InlineKeyboardMarkup:
+    chosen = selected or set()
+    options = (
+        ("amharic", "Amharic"),
+        ("afaan_oromo", "Afaan Oromo"),
+        ("english", "English"),
+    )
+    rows: list[list[InlineKeyboardButton]] = []
+    for code, label in options:
+        mark = "[x] " if code in chosen else ""
+        rows.append(
+            [
+                InlineKeyboardButton(
+                    f"{mark}{label}", callback_data=f"apply_lang_toggle:{code}"
+                )
+            ]
+        )
+    rows.append(
+        [
+            InlineKeyboardButton("Done", callback_data="apply_lang:done"),
+            InlineKeyboardButton("Skip", callback_data="apply_lang:skip"),
+        ]
+    )
+    rows.append([InlineKeyboardButton("Cancel", callback_data="apply_cancel")])
+    return InlineKeyboardMarkup(rows)

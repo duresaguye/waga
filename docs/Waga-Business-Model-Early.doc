@@ -1,0 +1,100 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:w="urn:schemas-microsoft-com:office:word"
+ xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>Waga — Early Business Model</title>
+<style>
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; margin: 0.7in; }
+  h1 { font-size: 18pt; margin-top: 0; }
+  h2 { font-size: 13pt; margin-top: 14pt; margin-bottom: 6pt; }
+  h3 { font-size: 11pt; margin-top: 10pt; margin-bottom: 4pt; }
+  p { margin: 6pt 0; }
+  .line { font-style: italic; margin: 8pt 0 12pt; }
+  table { border-collapse: collapse; width: 100%; margin: 8pt 0 12pt; font-size: 10pt; }
+  th, td { border: 1px solid #333; padding: 5pt 6pt; vertical-align: top; text-align: left; }
+  th { background: #f0f0f0; }
+  ul, ol { margin: 4pt 0 8pt 18pt; }
+  li { margin: 3pt 0; }
+</style>
+</head>
+<body>
+
+<h1>Waga — Early Business Model (Clear Version)</h1>
+<p>Aligned with final product scope: <b>WHAT_WE_ARE_BUILDING</b></p>
+
+<p class="line"><b>Positioning:</b> Waga Intelligence is Ethiopia's AI-assisted food affordability monitoring platform that helps humanitarian organizations understand real market conditions and make smarter cash assistance decisions.</p>
+<p>Waga is a <b>B2B data intelligence company</b>, not a consumer app.</p>
+<p class="line"><b>MVP formula:</b> Waga = Verified Ethiopian Market Data + Food Affordability Score + Market Heat Map + AI Humanitarian Copilot</p>
+
+<h2>1. The painful problem</h2>
+<p>Humanitarian organizations must answer: <i>“How much money should we give families so they can still buy enough food?”</i></p>
+<p>Today they often use delayed CPI reports, slow manual surveys, or outdated studies.</p>
+<p><b>Wrong numbers are expensive.</b> Example: 50,000 families × 500 birr error = <b>25,000,000 birr</b> impact.</p>
+
+<h2>2. Who can use Waga?</h2>
+<h3>A. Paying customers</h3>
+<p><b>1) Humanitarian NGOs ⭐ first</b> — Use Affordability Score, Heat Map, AI Copilot, and Impact to set cash assistance in Addis Ababa.</p>
+<p><b>2) Research / universities</b> — Reports, datasets, API.</p>
+<p><b>3) Government (future)</b> · <b>4) Food companies (future)</b></p>
+<h3>B. Free users</h3>
+<p>Public lookup for trust — not expected to pay.</p>
+<h3>C. Not first</h3>
+<ul>
+  <li>Normal consumers</li>
+  <li>Farmers</li>
+  <li>Banks / insurance</li>
+</ul>
+
+<h2>3. Revenue</h2>
+<table>
+  <tr><th>Plan</th><th>Who</th><th>Guide price</th><th>Includes</th></tr>
+  <tr><td>Starter</td><td>Small NGOs</td><td>~$100/month</td><td>Dashboard, affordability score, monthly reports</td></tr>
+  <tr><td>Professional</td><td>Medium orgs</td><td>~$500/month</td><td>Heat map, AI copilot, export, real-time dashboard</td></tr>
+  <tr><td>Enterprise</td><td>Large orgs</td><td>Custom</td><td>API, custom reports, support</td></tr>
+</table>
+<p>Also: Data API + custom reports. <b>No ads.</b> Local NGOs: ETB / grant packaging OK.</p>
+
+<h2>4. Why they keep paying</h2>
+<ul>
+  <li>Prices change often</li>
+  <li>Cash programs need recurring updates</li>
+  <li>Workflows depend on Waga</li>
+  <li>Verified local network is hard to copy</li>
+</ul>
+
+<h2>5. Early go-to-market</h2>
+<p><b>Phase 1 — Addis only:</b> Ehil Berenda + Atikilt Tera; 5 staples; Telegram <b>scored contributors</b> + review (accepted = +score; bad data = penalty/ban; money later); dashboard with Affordability Score + Heat Map + Copilot + Impact.</p>
+<p><b>Phase 2:</b> expand region by region.</p>
+<p>Do <b>not</b> lead with prediction, OCR, or national coverage.</p>
+
+<h2>5b. Contributor incentive</h2>
+<p>Do not rely on unpaid volunteers forever. <b>v1:</b> reputation points + ban. <b>Later:</b> micro-rewards (airtime / mobile money) for trusted high scores, funded by NGO subscriptions. Pitch: contributors earn reputation for accurate prices and can unlock micro-rewards; cheaters get penalized or banned.</p>
+
+<h2>6. What AI does</h2>
+<p>Helper only. Copilot suggests cash adjustment from verified data. Does not invent prices. Later: Addis AI STT in Telegram.</p>
+
+<h2>7. Competitive advantage</h2>
+<ol>
+  <li>Verified local contributor network</li>
+  <li>Amharic / Afaan Oromo / English</li>
+  <li>Market-level heat (not only national inflation)</li>
+</ol>
+
+<h2>8. Demo story</h2>
+<p>NGO → Addis → 5 foods → June 4,100 → July 4,850 → <b>+18%</b> → Affordability Tightening → Heat map → Copilot +15–18% → Impact birr → show Telegram → review → publish.</p>
+
+<h2>9. Final pitch block</h2>
+<table>
+  <tr><td><b>Problem</b></td><td>No fast, local, reliable food price data for cash decisions</td></tr>
+  <tr><td><b>Solution</b></td><td>Verified prices + affordability score + heat map + AI copilot</td></tr>
+  <tr><td><b>Initial market</b></td><td>Addis Ababa humanitarian organizations</td></tr>
+  <tr><td><b>Revenue</b></td><td>Subscription + API + custom reports</td></tr>
+  <tr><td><b>Impact</b></td><td>Right support at the right time</td></tr>
+</table>
+
+<h2>10. Team rule</h2>
+<p>NGOs first. Do not make Waga bigger — make it smarter. Product truth: <b>WHAT_WE_ARE_BUILDING</b>.</p>
+
+</body>
+</html>

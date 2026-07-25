@@ -3,6 +3,8 @@
 FastAPI backend for price submission, normalization, validation, market-price
 computation, and institutional exports.
 
+**What we are building (final product scope):** [`docs/WHAT_WE_ARE_BUILDING.md`](docs/WHAT_WE_ARE_BUILDING.md)
+
 ## Requirements
 
 - Python 3.13 or newer
@@ -26,6 +28,17 @@ documentation at `/docs`.
 Set a unique `WAGA_JWT_SECRET_KEY` containing at least 32 random bytes before
 running in production. Supabase is used as PostgreSQL hosting only; authentication
 is managed by this API.
+
+## Telegram bot (contributor intake)
+
+Phase 1 structured intake bot lives in `telegram_bot/`. See `docs/telegram-bot.md`.
+
+```bash
+# requires WAGA_TELEGRAM_BOT_TOKEN in .env
+uv run waga-telegram-bot
+```
+
+Default `WAGA_TELEGRAM_DRY_RUN=true` logs submissions until the API route exists.
 
 ## Quality checks
 

@@ -41,6 +41,10 @@ class ReferenceDataRepository:
     async def get_market(self, market_id: int) -> Market | None:
         return cast(Market | None, await self._session.get(Market, market_id))
 
+    async def get_market_by_code(self, code: str) -> Market | None:
+        statement = select(Market).where(Market.code == code.strip())
+        return cast(Market | None, await self._session.scalar(statement))
+
     def add_market(self, market: Market) -> None:
         self._session.add(market)
 
@@ -61,6 +65,10 @@ class ReferenceDataRepository:
 
     async def get_commodity(self, commodity_id: int) -> Commodity | None:
         return cast(Commodity | None, await self._session.get(Commodity, commodity_id))
+
+    async def get_commodity_by_code(self, code: str) -> Commodity | None:
+        statement = select(Commodity).where(Commodity.code == code.strip())
+        return cast(Commodity | None, await self._session.scalar(statement))
 
     def add_commodity(self, commodity: Commodity) -> None:
         self._session.add(commodity)
@@ -84,6 +92,17 @@ class ReferenceDataRepository:
         return cast(
             CommoditySynonym | None,
             await self._session.get(CommoditySynonym, synonym_id),
+        )
+
+    async def get_synonym_by_normalized_script(
+        self, *, normalized: str, script: object
+    ) -> CommoditySynonym | None:
+        statement = select(CommoditySynonym).where(
+            CommoditySynonym.normalized == normalized,
+            CommoditySynonym.script == script,
+        )
+        return cast(
+            CommoditySynonym | None, await self._session.scalar(statement)
         )
 
     def add_synonym(self, synonym: CommoditySynonym) -> None:

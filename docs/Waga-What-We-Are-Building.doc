@@ -1,0 +1,95 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:w="urn:schemas-microsoft-com:office:word"
+ xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>What We Are Building — Waga</title>
+<style>
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; margin: 0.7in; }
+  h1 { font-size: 18pt; margin-top: 0; }
+  h2 { font-size: 13pt; margin-top: 14pt; margin-bottom: 6pt; }
+  h3 { font-size: 11pt; margin-top: 10pt; margin-bottom: 4pt; }
+  p { margin: 6pt 0; }
+  .line { font-style: italic; margin: 8pt 0 12pt; }
+  table { border-collapse: collapse; width: 100%; margin: 8pt 0 12pt; font-size: 10pt; }
+  th, td { border: 1px solid #333; padding: 5pt 6pt; vertical-align: top; text-align: left; }
+  th { background: #f0f0f0; }
+  ul, ol { margin: 4pt 0 8pt 18pt; }
+  li { margin: 3pt 0; }
+  pre { font-size: 9pt; background: #f7f7f7; padding: 8pt; }
+</style>
+</head>
+<body>
+
+<h1>What We Are Building — Final Product Scope</h1>
+<p><b>For agents and the team. Read before adding features.</b><br>Do not make Waga bigger. Make it smarter.</p>
+
+<h2>Positioning (final)</h2>
+<p class="line">Waga Intelligence is Ethiopia's AI-assisted food affordability monitoring platform that helps humanitarian organizations understand real market conditions and make smarter cash assistance decisions.</p>
+<p>B2B for NGOs — not a consumer price website.</p>
+<p class="line"><b>MVP:</b> Waga = Verified Ethiopian Market Data + Food Affordability Score + Market Heat Map + AI Humanitarian Copilot</p>
+
+<h2>Primary customer</h2>
+<p><b>v1 beachhead only:</b> Addis Ababa humanitarian organizations (cash / food assistance).</p>
+<p>Out: farmers, banks, insurance, national coverage, heavy forecasting.</p>
+
+<h2>Product pillars</h2>
+<table>
+  <tr><th>Pillar</th><th>What</th><th>v1</th></tr>
+  <tr><td>Verified Price Network</td><td>Scored contributors via Telegram → review → index; bad data → penalty/ban</td><td>Must ship</td></tr>
+  <tr><td>Contributor reputation</td><td>+score on accept, −score/ban on abuse; money later</td><td>Must ship (score); payouts later</td></tr>
+  <tr><td>Food Affordability Score</td><td>Basket cost + % change + label</td><td>Must ship</td></tr>
+  <tr><td>Market Heat Map</td><td>Which Addis markets are hot/cool</td><td>Must ship</td></tr>
+  <tr><td>AI Humanitarian Copilot</td><td>Cash adjustment advice from our data</td><td>Must ship</td></tr>
+  <tr><td>Impact Measurement</td><td>Families × wrong gap = birr impact</td><td>Should ship</td></tr>
+  <tr><td>Price prediction</td><td>Future prices</td><td>Roadmap only</td></tr>
+</table>
+
+<h2>Phase 1 scope</h2>
+<p><b>City:</b> Addis Ababa<br>
+<b>Markets:</b> Ehil Berenda, Atikilt Tera<br>
+<b>Commodities:</b> teff (mixed), wheat, maize, onion, cooking oil<br>
+<b>Index:</b> 72h window, ≥3 accepted submissions per cell</p>
+
+<h2>Stack</h2>
+<pre>Telegram bot → FastAPI + PostgreSQL → NGO Dashboard (React/Next)
+  Review, index, Affordability Score, Heat Map API, Copilot API</pre>
+<ul>
+  <li>Intake: telegram_bot (buttons first; Addis AI STT later)</li>
+  <li>AI assists — does not invent prices</li>
+</ul>
+
+<h2>Out of scope now</h2>
+<ul>
+  <li>Prediction as main feature</li>
+  <li>OCR / receipts / Vision</li>
+  <li>All-Ethiopia launch</li>
+  <li>Farmers / banks / insurance</li>
+  <li>Consumer-paid app / ads</li>
+  <li>Full mobile-money payout rails (v1 = score + ban; money next)</li>
+</ul>
+
+<h2>Demo acceptance</h2>
+<ol>
+  <li>NGO → Addis → 5 foods</li>
+  <li>Basket June 4,100 → July 4,850 (+18%)</li>
+  <li>Heat map hottest markets</li>
+  <li>Copilot ~15–18% raise</li>
+  <li>Impact birr line</li>
+  <li>Optional: Telegram → review → published</li>
+</ol>
+
+<h2>Agent build order</h2>
+<ol>
+  <li>Submissions API + review (wire Telegram)</li>
+  <li>Basket + Food Affordability Score</li>
+  <li>Heat map API + dashboard</li>
+  <li>Copilot endpoint + UI</li>
+  <li>Impact on same dashboard</li>
+  <li>Later: STT, more markets, API billing</li>
+</ol>
+
+<p>When product and code conflict, prefer this scope; use AGENT.md for backend coding rules.</p>
+
+</body>
+</html>

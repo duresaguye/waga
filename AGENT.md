@@ -3,6 +3,11 @@
 REST API and data pipeline for collecting Ethiopian market prices, reviewing submissions,
 computing auditable market-price index values, and serving institutional data exports.
 
+**Product scope (read first):** [`docs/WHAT_WE_ARE_BUILDING.md`](docs/WHAT_WE_ARE_BUILDING.md)  
+**Backend ownership split:** [`docs/WORK_SPLIT.md`](docs/WORK_SPLIT.md) — Track A (intake/review) vs Track B (index/score/heat/copilot).  
+That product file is the source of truth for *what* we build. The work split stops two backend
+devs building the same thing. This file covers *how* to implement the backend.
+
 This repository contains a minimal FastAPI scaffold and the initial database schema.
 `plan.md` defines the approved target and tracks the remaining implementation iterations.
 
@@ -191,23 +196,33 @@ current phase.
 - Create the first administrator explicitly with `uv run waga-create-admin`.
 - Never accept a token-selected JWT algorithm or put refresh tokens in logs.
 
+## Approved Next Intake: Telegram Bot
+
+Structured Telegram contributor intake is approved as the next collection channel:
+
+- Package: `telegram_bot/`
+- Flow: consent → market → commodity → numeric price → confirm
+- Phase 1 markets/commodities are hardcoded in `telegram_bot/reference.py`
+- Default mode is dry-run until `POST /api/v1/submissions` exists
+- Voice/ASR (including Addis AI STT) remains deferred until the button flow is stable
+
 ## Deferred Features
 
-The following are intentionally outside the current implementation:
+The following remain outside the current implementation:
 
-- Telegram bot and Telegram webhooks
+- Telegram webhooks (Phase 1 uses polling)
 - Voice submissions and audio retention
-- ASR vendor integrations
+- ASR vendor integrations (Addis AI STT planned later)
 - LLM parsing
 - Automatic price verification
 - Background workers, queues, and scheduled jobs
-- Contributor accuracy scoring
-- Payments or reward points
+- Full mobile-money / payout rails (reputation **score + ban** is approved for v1; cash rewards later)
+- Automated ML contributor scoring beyond simple accept/flag deltas
 - Public institutional API authentication
 - Forecasting and imputation
 
-Do not add stubs, adapters, environment variables, database tables, or dependencies for these
-features unless an approved later plan introduces them.
+Do not add stubs, adapters, environment variables, database tables, or dependencies for remaining
+deferred features unless an approved later plan introduces them.
 
 ## Configuration
 
