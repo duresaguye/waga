@@ -77,9 +77,9 @@ async def seed() -> None:
                         is_active=True,
                     )
                 )
-                print(f"synonym + {code}: {surface} ({script.value})")
+                print(f"synonym + {code}: {surface!r} ({script.value})")
             else:
-                print(f"synonym = {code}: {surface}")
+                print(f"synonym = {code}: {surface!r}")
 
         await session.commit()
         print("Phase 1 seed complete.")
