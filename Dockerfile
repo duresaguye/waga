@@ -1,8 +1,10 @@
-FROM python:3.14-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
 RUN pip install --no-cache-dir uv
+
+ENV UV_PYTHON=python3
 
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev

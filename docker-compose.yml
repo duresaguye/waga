@@ -15,5 +15,16 @@ services:
       timeout: 5s
       retries: 10
 
+  backend:
+    build: .
+    environment:
+      WAGA_DATABASE_URL: postgresql+asyncpg://waga:waga@db:5432/waga
+      WAGA_JWT_SECRET_KEY: replace-with-at-least-32-random-bytes
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   waga_postgres_data:
