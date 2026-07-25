@@ -17,6 +17,9 @@ services:
 
   backend:
     build: .
+    env_file:
+      - path: .env
+        required: false
     environment:
       WAGA_ENVIRONMENT: development
       WAGA_DATABASE_URL: postgresql+asyncpg://waga:waga@db:5432/waga
@@ -24,6 +27,11 @@ services:
       WAGA_SEED_ADMIN_EMAIL: admin@waga.com
       WAGA_SEED_ADMIN_PASSWORD: AdminPassword12!
       WAGA_SEED_ADMIN_DISPLAY_NAME: Super Admin
+      WAGA_CHAPA_TEST_SECRET_KEY: ${WAGA_CHAPA_TEST_SECRET_KEY:-}
+      WAGA_CHAPA_TEST_PUBLIC_KEY: ${WAGA_CHAPA_TEST_PUBLIC_KEY:-}
+      WAGA_CHAPA_WEBHOOK_SECRET: ${WAGA_CHAPA_WEBHOOK_SECRET:-}
+      WAGA_CHAPA_CALLBACK_URL: http://127.0.0.1:8000/api/v1/webhooks/chapa/callback
+      WAGA_CHAPA_RETURN_URL: http://localhost:5173/account/billing
     ports:
       - "8000:8000"
     depends_on:

@@ -101,7 +101,7 @@ async def test_get_current_subscriber_rejects_non_subscriber_roles() -> None:
         with pytest.raises(HTTPException) as error:
             await get_current_subscriber(_user(role), fake)  # type: ignore[arg-type]
         assert error.value.status_code == 403
-        assert error.value.detail == "Subscriber account required"
+        assert error.value.detail["error"]["code"] == "subscriber_required"
 
 
 async def test_get_current_subscriber_allows_subscriber() -> None:

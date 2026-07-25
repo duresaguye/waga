@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import json
+import re
 from collections.abc import Callable
 from datetime import datetime
 from decimal import Decimal
@@ -101,10 +102,7 @@ class ChapaPaymentService:
             "tx_ref": tx_ref,
             "callback_url": self._settings.chapa_callback_url,
             "return_url": return_url,
-            "customization": {
-                "title": "Waga Intelligence",
-                "description": f"{plan.name_en} ({resolved_billing_plan.value})",
-            },
+            "customization": self._checkout_customization(plan.name_en),
         }
 
         response = await self._request(
@@ -240,13 +238,50 @@ class ChapaPaymentService:
             raise ChapaApiError("Chapa API returned invalid JSON") from error
 
         if response.status_code >= 400 or body.get("status") != "success":
-            message = body.get("message")
-            detail = message if isinstance(message, str) else "Chapa API error"
-            raise ChapaApiError(detail)
+            raise ChapaApiError(self._format_chapa_error(body))
 
         if not isinstance(body, dict):
             raise ChapaApiError("Chapa API returned an unexpected payload")
         return body
+
+    @staticmethod
+    def _format_chapa_error(body: object) -> str:
+        if not isinstance(body, dict):
+            return "Chapa API error"
+        message = body.get("message")
+        if isinstance(message, str) and message.strip():
+            return message.strip()
+        if isinstance(message, dict):
+            parts: list[str] = []
+            for field, errors in message.items():
+                if isinstance(errors, list):
+                    codes = ", ".join(str(item) for item in errors)
+                    parts.append(f"{field}: {codes}")
+                else:
+                    parts.append(f"{field}: {errors}")
+            if parts:
+                return "; ".join(parts)
+        errors = body.get("errors")
+        if isinstance(errors, dict):
+            parts = [f"{field}: {value}" for field, value in errors.items()]
+            if parts:
+                return "; ".join(parts)
+        return "Chapa API error"
+
+    @staticmethod
+    def _sanitize_chapa_text(value: str, *, max_length: int) -> str:
+        cleaned = re.sub(r"[^A-Za-z0-9\-_. ]", " ", value)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        if not cleaned:
+            return "Waga"
+        return cleaned[:max_length].rstrip()
+
+    @classmethod
+    def _checkout_customization(cls, plan_name: str) -> dict[str, str]:
+        return {
+            "title": cls._sanitize_chapa_text("Waga", max_length=16),
+            "description": cls._sanitize_chapa_text(plan_name, max_length=64),
+        }
 
     @staticmethod
     def _split_name(display_name: str | None) -> tuple[str, str]:

@@ -40,6 +40,7 @@ from app.services.exceptions import (
 )
 from app.services.subscription_plans import SubscriptionPlanService
 from app.services.subscriptions import SubscriptionContext, SubscriptionService
+from app.services.api_errors import error_body
 
 router = APIRouter(tags=["subscriptions"])
 
@@ -188,12 +189,15 @@ async def create_checkout(
     except ChapaNotConfiguredError as error:
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Chapa payment is not configured",
+            detail=error_body(
+                "chapa_not_configured",
+                "Chapa payment is not configured. Set WAGA_CHAPA_TEST_SECRET_KEY in your environment.",
+            ),
         ) from error
     except ChapaApiError as error:
         raise HTTPException(
             status.HTTP_502_BAD_GATEWAY,
-            detail=str(error),
+            detail=error_body("chapa_api_error", str(error)),
         ) from error
     if payment.checkout_url is None:
         raise HTTPException(
@@ -223,12 +227,15 @@ async def get_checkout_status(
     except ChapaNotConfiguredError as error:
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Chapa payment is not configured",
+            detail=error_body(
+                "chapa_not_configured",
+                "Chapa payment is not configured. Set WAGA_CHAPA_TEST_SECRET_KEY in your environment.",
+            ),
         ) from error
     except ChapaApiError as error:
         raise HTTPException(
             status.HTTP_502_BAD_GATEWAY,
-            detail=str(error),
+            detail=error_body("chapa_api_error", str(error)),
         ) from error
     return PaymentResponse.model_validate(payment)
 
