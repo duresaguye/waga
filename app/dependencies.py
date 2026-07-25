@@ -37,6 +37,7 @@ from app.services.reviews import ReviewService
 from app.services.submissions import SubmissionService
 from app.services.subscription_plans import SubscriptionPlanService
 from app.services.subscriptions import SubscriptionContext, SubscriptionService
+from app.services.api_errors import error_body
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -460,12 +461,15 @@ async def get_current_subscriber(
     if current_user.role != UserRole.SUBSCRIBER:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Subscriber account required",
+            detail=error_body(
+                "subscriber_required",
+                "Subscriber account required",
+            ),
         )
     if current_user.status != UserStatus.ACTIVE:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Account is not active",
+            detail=error_body("account_inactive", "Account is not active"),
         )
     await subscription_service.ensure_subscription(current_user)
     return current_user

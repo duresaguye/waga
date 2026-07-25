@@ -274,3 +274,20 @@ def test_chapa_not_configured_without_secret_key() -> None:
 
     with pytest.raises(ChapaNotConfiguredError):
         service._require_secret_key()  # noqa: SLF001
+
+
+def test_format_chapa_error_handles_validation_object_message() -> None:
+    detail = ChapaPaymentService._format_chapa_error(
+        {"status": "failed", "message": {"email": ["validation.email"]}}
+    )
+    assert detail == "email: validation.email"
+
+
+def test_checkout_customization_respects_chapa_limits() -> None:
+    customization = ChapaPaymentService._checkout_customization(
+        "Professional Monthly (monthly)"
+    )
+    assert len(customization["title"]) <= 16
+    assert customization["title"] == "Waga"
+    assert customization["description"] == "Professional Monthly monthly"
+    assert "(" not in customization["description"]

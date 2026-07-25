@@ -9,6 +9,7 @@ from httpx import ASGITransport, AsyncClient
 from app.dependencies import (
     get_chapa_payment_service,
     get_current_subscriber,
+    get_current_user,
     get_subscription_service,
     require_feature,
 )
@@ -157,6 +158,36 @@ async def test_access_matrix_for_anonymous_user() -> None:
     assert body["api_contract_tier"] == "public"
 
 
+async def test_checkout_rejects_contributor_token() -> None:
+    contributor = User(
+        id=uuid4(),
+        email="contributor@example.com",
+        password_hash="unused",
+        display_name="Contributor",
+        role=UserRole.CONTRIBUTOR,
+        status=UserStatus.ACTIVE,
+        auth_version=1,
+        failed_login_attempts=0,
+        created_at=datetime(2026, 7, 25, tzinfo=UTC),
+    )
+    app.dependency_overrides[get_current_user] = lambda: contributor
+    app.dependency_overrides[get_subscription_service] = lambda: FakeSubscriptionService()
+    transport = ASGITransport(app=app)
+    try:
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/api/v1/subscriptions/checkout",
+                json={"billing_plan": "monthly"},
+            )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 403
+    body = response.json()
+    assert body["error"]["code"] == "subscriber_required"
+    assert body["error"]["message"] == "Subscriber account required"
+
+
 async def test_checkout_returns_chapa_url() -> None:
     fake_user = FakeSubscriptionService().user
     app.dependency_overrides[get_chapa_payment_service] = lambda: FakeChapaService()
@@ -225,4 +256,4 @@ async def test_get_current_subscriber_rejects_contributor() -> None:
         await get_current_subscriber(contributor, fake)  # type: ignore[arg-type]
 
     assert error.value.status_code == 403
-    assert error.value.detail == "Subscriber account required"
+    assert error.value.detail["error"]["code"] == "subscriber_required"
