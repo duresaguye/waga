@@ -520,7 +520,7 @@ def register_apply_handlers(application: Application) -> None:
             ],
             ApplyState.CITY: [
                 CallbackQueryHandler(
-                    apply_city_callback, pattern=r"^(apply_city:|apply_cancel)$"
+                    apply_city_callback, pattern=r"^(apply_city:.+|apply_cancel)$"
                 )
             ],
             ApplyState.CITY_OTHER: [
@@ -529,7 +529,7 @@ def register_apply_handlers(application: Application) -> None:
             ApplyState.SUBCITY: [
                 CallbackQueryHandler(
                     apply_subcity_callback,
-                    pattern=r"^(apply_subcity:|apply_cancel)$",
+                    pattern=r"^(apply_subcity:.+|apply_cancel)$",
                 )
             ],
             ApplyState.SUBCITY_OTHER: [
@@ -539,7 +539,7 @@ def register_apply_handlers(application: Application) -> None:
             ],
             ApplyState.MARKET: [
                 CallbackQueryHandler(
-                    apply_market, pattern=r"^(apply_market:|apply_cancel)$"
+                    apply_market, pattern=r"^(apply_market:.+|apply_cancel)$"
                 )
             ],
             ApplyState.MARKET_OTHER: [
@@ -547,34 +547,34 @@ def register_apply_handlers(application: Application) -> None:
                 MessageHandler(filters.VOICE | filters.AUDIO, apply_market_other_voice),
                 CallbackQueryHandler(
                     apply_market_other_lang,
-                    pattern=r"^(apply_voice:lang:|apply_cancel)$",
+                    pattern=r"^(apply_voice:lang:.+|apply_cancel)$",
                 ),
             ],
             ApplyState.MARKET_OTHER_CONFIRM: [
                 CallbackQueryHandler(
                     apply_market_other_voice_confirm,
-                    pattern=r"^(apply_voice:|apply_cancel)$",
+                    pattern=r"^(apply_voice:.+|apply_cancel)$",
                 ),
             ],
             ApplyState.FREQUENCY: [
                 CallbackQueryHandler(
-                    apply_frequency, pattern=r"^(apply_freq:|apply_cancel)$"
+                    apply_frequency, pattern=r"^(apply_freq:.+|apply_cancel)$"
                 )
             ],
             ApplyState.LANGUAGES: [
                 CallbackQueryHandler(
                     apply_languages_callback,
-                    pattern=r"^(apply_lang_toggle:|apply_lang:|apply_cancel)$",
+                    pattern=r"^(apply_lang_toggle:.+|apply_lang:.+|apply_cancel)$",
                 )
             ],
             ApplyState.CONSENT: [
                 CallbackQueryHandler(
-                    apply_consent, pattern=r"^(apply_consent:|apply_cancel)$"
+                    apply_consent, pattern=r"^(apply_consent:.+|apply_cancel)$"
                 )
             ],
             ApplyState.CONFIRM: [
                 CallbackQueryHandler(
-                    apply_confirm, pattern=r"^(apply_confirm:|apply_cancel)$"
+                    apply_confirm, pattern=r"^(apply_confirm:.+|apply_cancel)$"
                 )
             ],
         },

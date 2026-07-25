@@ -415,10 +415,11 @@ async def market_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await query.edit_message_text("Other market selected.")
         assert query.message is not None
         await query.message.reply_text(
-            "Type the market name in Amharic, Afaan Oromo, or English.\n"
-            "Example: Autobis Tera\n\n"
-            "Or send a voice note - Addis AI will transcribe it.\n"
-            "Tip: tap Amharic/Oromo below before speaking.",
+            "Other market — send a voice note with the market name.\n"
+            "1) Tap Amharic voice or Oromo voice\n"
+            "2) Record and send\n"
+            "3) Tap Use this name\n"
+            "4) Choose food + price, then Confirm to submit",
             reply_markup=other_market_prompt_keyboard(prefix="voice_mkt"),
         )
         return SubmitState.MARKET_OTHER
@@ -458,8 +459,8 @@ async def market_other_lang_callback(
         lang = data.rsplit(":", 1)[-1]
         context.user_data["voice_lang"] = lang
         await query.edit_message_text(
-            f"Voice language set to {lang}.\n"
-            "Send a voice note now, or type the market name."
+            f"Language: {lang}.\n"
+            "Now send a voice note saying the market name."
         )
     return SubmitState.MARKET_OTHER
 
@@ -489,14 +490,14 @@ async def market_other_voice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     except Exception:
         logger.exception("Voice transcription failed")
         await update.effective_message.reply_text(
-            "Could not transcribe that voice note. Type the market name instead."
+            "Could not read that voice note. Send the voice note again."
         )
         return SubmitState.MARKET_OTHER
 
     label = result.text.strip()
     if len(label) < 2:
         await update.effective_message.reply_text(
-            "I could not hear a clear market name. Please try again or type it."
+            "I could not hear a clear market name. Please send the voice note again."
         )
         return SubmitState.MARKET_OTHER
 
@@ -505,7 +506,7 @@ async def market_other_voice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if result.confidence is not None:
         conf = f"\nConfidence: {result.confidence:.0%}"
     await update.effective_message.reply_text(
-        f"I heard:\n\n{label}{conf}\n\nUse this market name?",
+        f"I heard:\n\n{label}{conf}\n\nTap Use this name to continue to submit.",
         reply_markup=voice_label_confirm_keyboard(prefix="voice_mkt"),
     )
     return SubmitState.MARKET_OTHER_CONFIRM
@@ -531,7 +532,7 @@ async def market_other_voice_confirm(
         return SubmitState.MARKET_OTHER
 
     if data == "voice_mkt:retry":
-        await query.edit_message_text("Send another voice note, or type the market name.")
+        await query.edit_message_text("Send another voice note with the market name.")
         return SubmitState.MARKET_OTHER
 
     if data == "voice_mkt:type":
@@ -549,10 +550,11 @@ async def market_other_voice_confirm(
     context.user_data["market_code"] = OTHER_MARKET_CODE
     context.user_data["market_label"] = label
     context.user_data.pop("pending_market_label", None)
-    await query.edit_message_text(f"Market: {label}")
+    await query.edit_message_text(f"Market saved: {label}")
     assert query.message is not None
     await query.message.reply_text(
-        "Select commodity:", reply_markup=commodities_keyboard()
+        "Next: choose the food, enter the price, then Confirm to submit.",
+        reply_markup=commodities_keyboard(),
     )
     return SubmitState.COMMODITY
 
@@ -753,29 +755,29 @@ def register_submit_handlers(application: Application) -> None:
                 CallbackQueryHandler(consent_callback, pattern=r"^consent:"),
             ],
             SubmitState.MARKET: [
-                CallbackQueryHandler(market_callback, pattern=r"^(market:|cancel)$"),
+                CallbackQueryHandler(market_callback, pattern=r"^(market:.+|cancel)$"),
             ],
             SubmitState.MARKET_OTHER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, market_other_message),
                 MessageHandler(filters.VOICE | filters.AUDIO, market_other_voice),
                 CallbackQueryHandler(
-                    market_other_lang_callback, pattern=r"^(voice_mkt:lang:|cancel)$"
+                    market_other_lang_callback, pattern=r"^(voice_mkt:lang:.+|cancel)$"
                 ),
             ],
             SubmitState.MARKET_OTHER_CONFIRM: [
                 CallbackQueryHandler(
                     market_other_voice_confirm,
-                    pattern=r"^(voice_mkt:|cancel$)",
+                    pattern=r"^(voice_mkt:.+|cancel)$",
                 ),
             ],
             SubmitState.COMMODITY: [
-                CallbackQueryHandler(commodity_callback, pattern=r"^(commodity:|cancel)$"),
+                CallbackQueryHandler(commodity_callback, pattern=r"^(commodity:.+|cancel)$"),
             ],
             SubmitState.PRICE: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, price_message),
             ],
             SubmitState.CONFIRM: [
-                CallbackQueryHandler(confirm_callback, pattern=r"^(confirm:|cancel)$"),
+                CallbackQueryHandler(confirm_callback, pattern=r"^(confirm:.+|cancel)$"),
             ],
         },
         fallbacks=[

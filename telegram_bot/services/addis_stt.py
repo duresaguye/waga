@@ -70,7 +70,7 @@ class AddisSTTClient:
                 response.text[:500],
             )
             raise AddisSTTError(
-                f"Addis AI STT failed ({response.status_code}). Try typing the name."
+                f"Addis AI STT failed ({response.status_code}). Please send the voice note again."
             )
 
         payload = response.json()
@@ -99,7 +99,7 @@ def _extract_text(payload: dict[str, object]) -> str:
             value = data.get(key)
             if isinstance(value, str) and value.strip():
                 return value.strip()
-    for key in ("text", "transcription"):
+    for key in ("text", "transcription", "response_text"):
         value = payload.get(key)
         if isinstance(value, str) and value.strip():
             return value.strip()

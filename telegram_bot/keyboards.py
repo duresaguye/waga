@@ -159,13 +159,8 @@ def score_actions_keyboard(*, can_redeem: bool) -> InlineKeyboardMarkup:
 def voice_label_confirm_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("Use this name", callback_data=f"{prefix}:yes")],
+            [InlineKeyboardButton("Use this name — continue", callback_data=f"{prefix}:yes")],
             [InlineKeyboardButton("Record again", callback_data=f"{prefix}:retry")],
-            [InlineKeyboardButton("Type instead", callback_data=f"{prefix}:type")],
-            [
-                InlineKeyboardButton("Amharic (am)", callback_data=f"{prefix}:lang:am"),
-                InlineKeyboardButton("Afaan Oromo (om)", callback_data=f"{prefix}:lang:om"),
-            ],
         ]
     )
 

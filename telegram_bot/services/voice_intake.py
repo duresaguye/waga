@@ -11,7 +11,11 @@ from pathlib import Path
 from telegram import Bot, Message
 
 from telegram_bot.config import TelegramBotSettings
-from telegram_bot.services.addis_stt import AddisSTTClient, AddisSTTError, TranscriptionResult
+from telegram_bot.services.addis_stt import (
+    AddisSTTClient,
+    AddisSTTError,
+    TranscriptionResult,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +30,7 @@ async def transcribe_message_audio(
     voice = message.voice
     audio = message.audio
     if voice is None and audio is None:
-        raise AddisSTTError("Please send a voice note or audio file.")
+        raise AddisSTTError("Please send a voice note.")
 
     file_id = voice.file_id if voice is not None else audio.file_id  # type: ignore[union-attr]
     suffix = ".ogg" if voice is not None else _suffix_from_audio(audio)
@@ -38,15 +42,19 @@ async def transcribe_message_audio(
 
         send_path = raw_path
         send_name = raw_path.name
-        content_type = None
+        content_type: str | None = None
+
+        # Addis AI accepts wav/mp3/m4a/webm — not Telegram ogg/opus.
         if suffix in {".ogg", ".oga"}:
             wav_path = Path(tmp) / "input.wav"
-            if _try_ffmpeg_to_wav(raw_path, wav_path):
-                send_path = wav_path
-                send_name = "input.wav"
-                content_type = "audio/wav"
-            else:
-                logger.info("ffmpeg not available; sending Telegram ogg as-is")
+            if not _convert_to_wav(raw_path, wav_path):
+                raise AddisSTTError(
+                    "Could not convert voice note for Addis AI. "
+                    "Please send again, or type the market name."
+                )
+            send_path = wav_path
+            send_name = "input.wav"
+            content_type = "audio/wav"
 
         client = AddisSTTClient(settings)
         return await client.transcribe_file(
@@ -69,9 +77,23 @@ def _suffix_from_audio(audio: object) -> str:
     return ".ogg"
 
 
-def _try_ffmpeg_to_wav(source: Path, dest: Path) -> bool:
-    ffmpeg = shutil.which("ffmpeg")
+def _ffmpeg_exe() -> str | None:
+    system = shutil.which("ffmpeg")
+    if system:
+        return system
+    try:
+        import imageio_ffmpeg
+
+        return imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception as error:  # noqa: BLE001
+        logger.warning("imageio-ffmpeg unavailable: %s", error)
+        return None
+
+
+def _convert_to_wav(source: Path, dest: Path) -> bool:
+    ffmpeg = _ffmpeg_exe()
     if not ffmpeg:
+        logger.error("No ffmpeg binary available for voice conversion")
         return False
     try:
         subprocess.run(
