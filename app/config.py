@@ -62,6 +62,8 @@ class Settings(BaseSettings):
     city_code: str = "addis_ababa"
     currency_code: str = "ETB"
     public_history_days: int = 30
+    # Comma-separated browser origins for Admin/Consumer apps (* = any origin, demo-friendly).
+    cors_origins: str = "*"
 
     # Demo admin seed (development / waga-seed-admin)
     seed_admin_email: str = "admin@waga.com"
