@@ -9,6 +9,7 @@ import app.models  # noqa: F401
 from app.database import Base
 
 EXPECTED_TABLES = {
+    "auth_sessions",
     "sectors",
     "markets",
     "commodities",
@@ -19,6 +20,10 @@ EXPECTED_TABLES = {
     "submissions",
     "submission_verifications",
     "index_values",
+    "users",
+    "audit_log",
+    "rate_limit_events",
+    "invite_tokens",
 }
 
 
@@ -47,6 +52,7 @@ def test_commodities_require_a_sector() -> None:
 
 def test_operational_records_use_uuid_primary_keys() -> None:
     for table_name in (
+        "auth_sessions",
         "contributors",
         "contributor_consents",
         "submissions",
@@ -56,6 +62,33 @@ def test_operational_records_use_uuid_primary_keys() -> None:
         primary_key = Base.metadata.tables[table_name].primary_key
         assert [column.name for column in primary_key.columns] == ["id"]
         assert primary_key.columns["id"].type.python_type is UUID
+
+
+def test_auth_schema_constraints_exist() -> None:
+    users = Base.metadata.tables["users"]
+    sessions = Base.metadata.tables["auth_sessions"]
+    user_checks = constraint_names("users", CheckConstraint)
+    session_checks = constraint_names("auth_sessions", CheckConstraint)
+
+    assert "ck_users_email_normalized" in user_checks
+    assert "ck_users_auth_version_positive" in user_checks
+    assert "ck_users_user_role" in user_checks
+    assert "ck_users_user_status" in user_checks
+    assert "ck_auth_sessions_refresh_hash_length" in session_checks
+    assert "ck_auth_sessions_valid_expiry" in session_checks
+    assert users.c.email.unique is True
+    assert sessions.c.refresh_token_hash.unique is True
+
+
+def test_contributor_can_link_to_one_user() -> None:
+    contributor = Base.metadata.tables["contributors"]
+    user_id = contributor.c.user_id
+
+    assert user_id.nullable is True
+    assert user_id.unique is True
+    foreign_key = next(iter(user_id.foreign_keys))
+    assert foreign_key.target_fullname == "users.id"
+    assert foreign_key.ondelete == "RESTRICT"
 
 
 def test_submission_idempotency_and_provenance_constraints_exist() -> None:
@@ -104,10 +137,7 @@ def test_all_tables_and_indexes_compile_for_postgresql() -> None:
 
 def test_migration_enforces_append_only_tables() -> None:
     migration = (
-        Path(__file__).parents[1]
-        / "migrations"
-        / "versions"
-        / "20260725_0001_initial_schema.py"
+        Path(__file__).parents[1] / "migrations" / "versions" / "20260725_0001_initial_schema.py"
     ).read_text()
 
     assert "CREATE FUNCTION reject_append_only_change()" in migration

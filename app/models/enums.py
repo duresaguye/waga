@@ -1,5 +1,4 @@
 from enum import StrEnum
-from typing import TypeVar
 
 
 class ContributorKind(StrEnum):
@@ -54,8 +53,17 @@ class SubmissionSource(StrEnum):
     SEED = "seed"
 
 
-EnumT = TypeVar("EnumT", bound=StrEnum)
+class UserRole(StrEnum):
+    ADMIN = "admin"
+    OPERATOR = "operator"
+    VIEWER = "viewer"
+    CONTRIBUTOR = "contributor"
 
 
-def enum_values(enum_class: type[EnumT]) -> list[str]:
+class UserStatus(StrEnum):
+    ACTIVE = "active"
+    DISABLED = "disabled"
+
+
+def enum_values[EnumT: StrEnum](enum_class: type[EnumT]) -> list[str]:
     return [item.value for item in enum_class]

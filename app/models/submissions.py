@@ -5,7 +5,6 @@ from uuid import UUID, uuid4
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     Index,
     Numeric,
@@ -16,6 +15,9 @@ from sqlalchemy import (
     Uuid,
     func,
     text,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 

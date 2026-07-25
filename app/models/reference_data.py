@@ -5,7 +5,6 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
     Index,
     Numeric,
@@ -15,6 +14,9 @@ from sqlalchemy import (
     UniqueConstraint,
     func,
     text,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -117,6 +119,14 @@ class Commodity(Base):
     name_en: Mapped[str] = mapped_column(String(160), nullable=False)
     name_am: Mapped[str] = mapped_column(String(160), nullable=False)
     canonical_unit: Mapped[str] = mapped_column(String(32), nullable=False)
+    allow_conversion: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=text("true"),
+    )
+    price_hint_low: Mapped[Decimal | None] = mapped_column(Numeric(18, 4))
+    price_hint_high: Mapped[Decimal | None] = mapped_column(Numeric(18, 4))
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         nullable=False,
@@ -167,6 +177,12 @@ class CommoditySynonym(Base):
             length=16,
         ),
         nullable=False,
+    )
+    is_active: Mapped[bool] = mapped_column(
+        Boolean,
+        nullable=False,
+        default=True,
+        server_default=text("true"),
     )
 
 

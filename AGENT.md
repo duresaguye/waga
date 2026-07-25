@@ -49,6 +49,7 @@ app/
 |   |-- router.py
 |   `-- routes/
 |       |-- health.py
+|       |-- auth.py
 |       |-- reference_data.py
 |       |-- submissions.py
 |       |-- reviews.py
@@ -176,6 +177,19 @@ The initial backend uses manual review:
 `VerificationRepository` persists review outcomes. Do not implement an automatic verification
 service, IQR rules, baseline outlier rules, LLM decisions, or duplicate-scoring logic in the
 current phase.
+
+## Authentication
+
+- Authentication is application-managed; Supabase is PostgreSQL hosting only.
+- Passwords use Argon2id.
+- Access tokens are 15-minute HS256 JWTs with fixed issuer and audience validation.
+- Refresh tokens are opaque, rotate on use, expire after 30 days, and are stored only as
+  SHA-256 hashes.
+- Refresh-token reuse revokes the entire session family.
+- Public registration creates contributor accounts only.
+- Staff roles are `admin`, `operator`, and `viewer`; use `require_roles()` for protected routes.
+- Create the first administrator explicitly with `uv run waga-create-admin`.
+- Never accept a token-selected JWT algorithm or put refresh tokens in logs.
 
 ## Deferred Features
 

@@ -3,18 +3,23 @@ name = "waga-backend"
 version = "0.1.0"
 description = "Backend API and data pipeline for Waga Index"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = [
-    "aiogram>=3.30.0",
     "alembic>=1.18.5",
     "asyncpg>=0.31.0",
+    "email-validator>=2.3.0",
     "fastapi>=0.139.2",
     "httpx>=0.28.1",
     "pydantic-settings>=2.14.2",
+    "pwdlib[argon2]>=0.3.0",
+    "pyjwt>=2.10.1",
     "python-multipart>=0.0.32",
     "sqlalchemy>=2.0.51",
     "uvicorn[standard]>=0.51.0",
 ]
+
+[project.scripts]
+waga-create-admin = "app.commands.create_admin:main"
 
 [dependency-groups]
 dev = [
@@ -24,21 +29,22 @@ dev = [
     "ruff>=0.15.22",
 ]
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py314"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "ASYNC"]
 
 [tool.mypy]
-python_version = "3.14"
+python_version = "3.13"
 strict = true
 plugins = ["pydantic.mypy"]
-
-
 

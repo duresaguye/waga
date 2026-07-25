@@ -2,9 +2,10 @@
 
 ## Status
 
-Schema phase completed on July 25, 2026. The ORM models, initial Alembic migration, database
-constraints, append-only triggers, and schema tests are implemented. Repositories, services,
-APIs, seed data, and Supabase connection changes remain deferred to later iterations.
+Schema and custom JWT authentication phases completed on July 25, 2026. The ORM models,
+Alembic migrations, password hashing, access and refresh-token workflows, role dependencies,
+auth API, initial-admin command, and focused tests are implemented. Domain CRUD, seed data,
+index calculation, reporting, and exports remain deferred to later iterations.
 
 ## Goal
 
@@ -51,6 +52,7 @@ waga/
 |   |   |-- router.py
 |   |   `-- routes/
 |   |       |-- health.py
+|   |       |-- auth.py
 |   |       |-- reference_data.py
 |   |       |-- submissions.py
 |   |       |-- reviews.py
@@ -58,6 +60,7 @@ waga/
 |   |       |-- coverage.py
 |   |       `-- exports.py
 |   |-- models/
+|   |   |-- auth.py
 |   |   |-- reference_data.py
 |   |   |-- contributors.py
 |   |   |-- submissions.py
@@ -65,6 +68,8 @@ waga/
 |   |   `-- index_values.py
 |   |-- schemas/
 |   |-- repositories/
+|   |   |-- users.py
+|   |   |-- auth_sessions.py
 |   |   |-- reference_data.py
 |   |   |-- contributors.py
 |   |   |-- submissions.py
@@ -72,6 +77,7 @@ waga/
 |   |   |-- index_values.py
 |   |   `-- reporting.py
 |   |-- services/
+|   |   |-- auth.py
 |   |   |-- submissions.py
 |   |   |-- index_calculation.py
 |   |   `-- exports.py
@@ -206,8 +212,23 @@ POST /api/v1/reviews/{submission_id}/flag
 
 New submissions return `202 Accepted` with the submission ID and `pending` status.
 
-Operator review endpoints require `X-Admin-Key`, validated against
-`WAGA_ADMIN_API_KEY`. The key must be compared using a timing-safe operation.
+Operator review endpoints require a valid JWT for an `admin` or `operator`.
+
+### Authentication
+
+```text
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+POST /api/v1/auth/refresh
+POST /api/v1/auth/logout
+POST /api/v1/auth/logout-all
+GET  /api/v1/auth/me
+POST /api/v1/auth/change-password
+```
+
+Public registration creates a linked contributor account. Access tokens expire after 15
+minutes. Opaque refresh tokens rotate on every use, expire after 30 days, and are stored only
+as SHA-256 hashes. Reuse of a rotated token revokes its full session family.
 
 ### Prices and reporting
 
@@ -241,7 +262,15 @@ WAGA_DEBUG=false
 WAGA_DATABASE_URL=
 WAGA_DATABASE_MIGRATION_URL=
 WAGA_TEST_DATABASE_URL=
-WAGA_ADMIN_API_KEY=
+WAGA_JWT_SECRET_KEY=
+WAGA_JWT_ISSUER=waga-index
+WAGA_JWT_AUDIENCE=waga-api
+WAGA_ACCESS_TOKEN_MINUTES=15
+WAGA_REFRESH_TOKEN_DAYS=30
+WAGA_MAX_FAILED_LOGIN_ATTEMPTS=5
+WAGA_LOGIN_LOCK_MINUTES=15
+WAGA_PASSWORD_MIN_LENGTH=12
+WAGA_PASSWORD_MAX_LENGTH=128
 WAGA_INDEX_WINDOW_HOURS=72
 WAGA_PUBLICATION_THRESHOLD=3
 WAGA_METHOD_VERSION=v1
@@ -256,14 +285,15 @@ WAGA_METHOD_VERSION=v1
 
 1. **Completed:** Add sector-aware ORM models and a complete initial Alembic migration.
 2. Align configuration and database connection handling with Supabase.
-3. Add reference-data seeds and loading commands.
-4. Add repositories and dependency wiring.
-5. Implement REST submission and manual review workflows.
-6. Implement deterministic index computation.
-7. Implement current price, history, comparison, coverage, and feed APIs.
-8. Implement licence-filtered CSV export.
-9. Add rebuild and operational commands.
-10. Complete PostgreSQL integration tests and production documentation.
+3. **Completed:** Add custom JWT authentication and role dependencies.
+4. Add reference-data seeds and loading commands.
+5. Add domain repositories and dependency wiring.
+6. Implement REST submission and manual review workflows.
+7. Implement deterministic index computation.
+8. Implement current price, history, comparison, coverage, and feed APIs.
+9. Implement licence-filtered CSV export.
+10. Add rebuild and operational commands.
+11. Complete PostgreSQL integration tests and production documentation.
 
 ## Test Plan
 

@@ -332,8 +332,7 @@ def upgrade() -> None:
             name="submission_input_mode",
         ),
         sa.CheckConstraint(
-            "licence_class IN "
-            "('commercial_permitted', 'internal_only', 'display_only')",
+            "licence_class IN ('commercial_permitted', 'internal_only', 'display_only')",
             name="licence_class",
         ),
         sa.CheckConstraint(

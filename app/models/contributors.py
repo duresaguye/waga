@@ -4,13 +4,16 @@ from uuid import UUID, uuid4
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
-    Enum as SqlEnum,
     ForeignKey,
+    SmallInteger,
     String,
     UniqueConstraint,
     Uuid,
     func,
     text,
+)
+from sqlalchemy import (
+    Enum as SqlEnum,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -26,6 +29,11 @@ class Contributor(Base):
         primary_key=True,
         default=uuid4,
         server_default=text("gen_random_uuid()"),
+    )
+    user_id: Mapped[UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("users.id", ondelete="RESTRICT"),
+        unique=True,
     )
     external_id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True),
@@ -44,6 +52,11 @@ class Contributor(Base):
         nullable=False,
         default=ContributorKind.USER,
         server_default=ContributorKind.USER.value,
+    )
+    telegram_id: Mapped[str | None] = mapped_column(String(64), unique=True)
+    market_id: Mapped[int | None] = mapped_column(
+        SmallInteger,
+        ForeignKey("markets.id", ondelete="SET NULL"),
     )
     first_seen_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
