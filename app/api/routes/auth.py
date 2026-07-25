@@ -47,6 +47,7 @@ async def register(
             str(request.email),
             request.password,
             request.display_name,
+            request.role,
         )
     except EmailAlreadyRegisteredError as error:
         raise HTTPException(
@@ -223,4 +224,5 @@ def _token_response(tokens: IssuedTokens) -> TokenResponse:
         access_token=tokens.access_token,
         refresh_token=tokens.refresh_token,
         expires_in=tokens.expires_in,
+        user=UserResponse.model_validate(tokens.user),
     )

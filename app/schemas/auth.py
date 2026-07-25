@@ -10,6 +10,14 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=1024)
     display_name: str | None = Field(default=None, max_length=160)
+    role: UserRole = UserRole.CONTRIBUTOR
+
+    @field_validator("role")
+    @classmethod
+    def role_must_be_contributor(cls, value: UserRole) -> UserRole:
+        if value != UserRole.CONTRIBUTOR:
+            raise ValueError("Public registration is only available for contributor accounts")
+        return value
 
     @field_validator("display_name")
     @classmethod
@@ -75,13 +83,6 @@ class InviteAcceptRequest(BaseModel):
         return value
 
 
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-    expires_in: int
-
-
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -91,3 +92,11 @@ class UserResponse(BaseModel):
     role: UserRole
     status: UserStatus
     created_at: datetime
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    expires_in: int
+    user: UserResponse

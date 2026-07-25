@@ -46,6 +46,7 @@ class IssuedTokens:
     access_token: str
     refresh_token: str
     expires_in: int
+    user: User
 
 
 class AuthService:
@@ -76,6 +77,7 @@ class AuthService:
         email: str,
         password: str,
         display_name: str | None,
+        role: UserRole = UserRole.CONTRIBUTOR,
     ) -> IssuedTokens:
         normalized_email = self._normalize_email(email)
         self._validate_password(password)
@@ -89,7 +91,7 @@ class AuthService:
             email=normalized_email,
             password_hash=await self._passwords.hash(password),
             display_name=display_name,
-            role=UserRole.CONTRIBUTOR,
+            role=role,
             status=UserStatus.ACTIVE,
             auth_version=1,
             failed_login_attempts=0,
@@ -411,4 +413,5 @@ class AuthService:
             access_token=self._jwt.create_access_token(user, self._clock()),
             refresh_token=refresh_token,
             expires_in=self._jwt.expires_in_seconds,
+            user=user,
         )

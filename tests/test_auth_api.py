@@ -13,15 +13,30 @@ from app.services.auth import IssuedTokens
 from app.services.exceptions import InvalidCredentialsError
 
 
+def sample_user() -> User:
+    return User(
+        id=uuid4(),
+        email="person@example.com",
+        password_hash="unused",
+        display_name="Person",
+        role=UserRole.CONTRIBUTOR,
+        status=UserStatus.ACTIVE,
+        auth_version=1,
+        failed_login_attempts=0,
+        created_at=datetime(2026, 7, 25, 12, 0, tzinfo=UTC),
+    )
+
+
 class FakeAuthService:
     async def register(
         self,
         email: str,
         password: str,
         display_name: str | None,
+        role: UserRole = UserRole.CONTRIBUTOR,
     ) -> IssuedTokens:
-        _ = (email, password, display_name)
-        return IssuedTokens("access-token", "refresh-token", 900)
+        _ = (email, password, display_name, role)
+        return IssuedTokens("access-token", "refresh-token", 900, sample_user())
 
     async def login(self, email: str, password: str) -> IssuedTokens:
         _ = (email, password)
@@ -39,18 +54,64 @@ async def test_register_returns_json_token_pair() -> None:
                     "email": "person@example.com",
                     "password": "valid-password",
                     "display_name": "Person",
+                    "role": "contributor",
                 },
             )
     finally:
         app.dependency_overrides.clear()
 
     assert response.status_code == 201
-    assert response.json() == {
-        "access_token": "access-token",
-        "refresh_token": "refresh-token",
-        "token_type": "bearer",
-        "expires_in": 900,
-    }
+    payload = response.json()
+    assert payload["access_token"] == "access-token"
+    assert payload["refresh_token"] == "refresh-token"
+    assert payload["token_type"] == "bearer"
+    assert payload["expires_in"] == 900
+    assert payload["user"]["email"] == "person@example.com"
+    assert payload["user"]["role"] == "contributor"
+    assert payload["user"]["display_name"] == "Person"
+
+
+async def test_login_returns_user_with_tokens() -> None:
+    user = sample_user()
+
+    class LoginAuthService(FakeAuthService):
+        async def login(self, email: str, password: str) -> IssuedTokens:
+            _ = (email, password)
+            return IssuedTokens("access-token", "refresh-token", 900, user)
+
+    app.dependency_overrides[get_auth_service] = lambda: LoginAuthService()
+    transport = ASGITransport(app=app)
+    try:
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.post(
+                "/api/v1/auth/login",
+                json={"email": "person@example.com", "password": "valid-password"},
+            )
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["access_token"] == "access-token"
+    assert payload["refresh_token"] == "refresh-token"
+    assert payload["user"]["email"] == "person@example.com"
+    assert payload["user"]["role"] == "contributor"
+    assert payload["user"]["id"] == str(user.id)
+
+
+async def test_register_rejects_non_contributor_role() -> None:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as client:
+        response = await client.post(
+            "/api/v1/auth/register",
+            json={
+                "email": "person@example.com",
+                "password": "valid-password",
+                "role": "admin",
+            },
+        )
+
+    assert response.status_code == 422
 
 
 async def test_login_uses_generic_invalid_credentials_response() -> None:
