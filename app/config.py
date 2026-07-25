@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     addis_ai_chat_url: str = "https://api.addisassistant.com/api/v1/chat_generate"
     addis_ai_default_lang: str = "am"
     review_ai_enabled: bool = True
+    # Optional: same BotFather token as the bot service — used to DM agents on approve.
+    telegram_bot_token: SecretStr | None = None
 
     # Subscription billing (Chapa)
     trial_days: int = 14
@@ -78,6 +80,7 @@ class Settings(BaseSettings):
 
     @field_validator(
         "addis_ai_api_key",
+        "telegram_bot_token",
         "chapa_test_secret_key",
         "chapa_test_public_key",
         "chapa_webhook_secret",

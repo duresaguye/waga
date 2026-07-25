@@ -470,31 +470,57 @@ async def apply_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     }
 
     if settings.telegram_dry_run:
-        logger.info("Dry-run agent application: %s", payload)
-        await query.edit_message_text("Application submitted. Thank you!")
-        context.user_data.pop("apply", None)
-        return ConversationHandler.END
-
-    try:
-        async with httpx.AsyncClient(timeout=20.0) as client:
-            response = await client.post(
-                f"{settings.api_base_url.rstrip('/')}/agents/applications",
-                json=payload,
-            )
-            if response.status_code == 409:
-                await query.edit_message_text(response.json().get("detail", "Conflict"))
-                context.user_data.pop("apply", None)
-                return ConversationHandler.END
-            response.raise_for_status()
-    except Exception:
-        logger.exception("Failed to submit application")
+        logger.warning(
+            "Dry-run agent application (NOT saved to API/DB): %s", payload
+        )
         await query.edit_message_text(
-            "Could not send application. Please try again."
+            "Application recorded in practice mode only.\n"
+            "It was NOT saved to the server.\n"
+            "Ask the team to set WAGA_TELEGRAM_DRY_RUN=false and restart the bot."
         )
         context.user_data.pop("apply", None)
         return ConversationHandler.END
 
-    await query.edit_message_text("Application submitted. Thank you!")
+    api_url = f"{settings.api_base_url.rstrip('/')}/agents/applications"
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(api_url, json=payload)
+            if response.status_code == 409:
+                detail = "Conflict"
+                try:
+                    detail = str(response.json().get("detail", detail))
+                except Exception:  # noqa: BLE001
+                    pass
+                await query.edit_message_text(detail)
+                context.user_data.pop("apply", None)
+                return ConversationHandler.END
+            if response.status_code >= 400:
+                logger.error(
+                    "Application API error status=%s body=%s url=%s",
+                    response.status_code,
+                    response.text[:500],
+                    api_url,
+                )
+                await query.edit_message_text(
+                    "Could not save application on the server.\n"
+                    f"Error {response.status_code}. Please try again."
+                )
+                context.user_data.pop("apply", None)
+                return ConversationHandler.END
+    except Exception:
+        logger.exception("Failed to submit application to %s", api_url)
+        await query.edit_message_text(
+            "Could not reach the server to save your application.\n"
+            "Please try again in a moment."
+        )
+        context.user_data.pop("apply", None)
+        return ConversationHandler.END
+
+    logger.info("Application saved for telegram_id=%s via %s", user.id, api_url)
+    await query.edit_message_text(
+        "Application submitted. Thank you!\n"
+        "Our team will review it."
+    )
     context.user_data.pop("apply", None)
     return ConversationHandler.END
 

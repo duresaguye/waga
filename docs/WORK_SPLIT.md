@@ -77,14 +77,16 @@ migrations/*input_mode* / seed         (A-owned migrations)
 
 **Goal:** NGO-facing numbers from accepted data.
 
+**Frontend guide:** [`docs/frontend-track-b.md`](frontend-track-b.md)
+
 ### Own these deliverables
-1. Index calculation for a market–commodity cell (72h, ≥3 accepted → publish / else insufficient)
-2. `GET` current price / series (minimal read APIs)
-3. **Food Affordability Score** API (Addis 5-item basket)
-4. **Market Heat Map** API (per-market pressure / % change)
-5. **AI Humanitarian Copilot** API (rule-based first: % change → suggested +15–18% style band)
-6. Impact helper (families × gap → birr) — can be part of copilot response
-7. Tests for score / heat / copilot math
+1. Index calculation for a market–commodity cell (72h, ≥3 accepted → publish / else insufficient) — **done** (`IndexCalculationService`, hooked on review accept)
+2. `GET` current price / series — **done** (`/prices/current`, `/prices/series`)
+3. **Food Affordability Score** API — **done** (`/affordability`)
+4. **Market Heat Map** API — **done** (`/heatmap`)
+5. **AI Humanitarian Copilot** API (rule-based) — **done** (`POST /copilot/ask`)
+6. Impact helper — **done** (`POST /impact` + embedded in copilot)
+7. Tests for score / heat / copilot math — **partial** (`tests/test_index_rules.py`)
 
 ### Own these paths (prefer)
 ```text

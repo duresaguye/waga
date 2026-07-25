@@ -246,6 +246,7 @@ If this story works end-to-end, the MVP is successful.
 | `docs/business-segment.md` | Second segment — sourcing & input-cost intelligence (not site selection) |
 | `contracts/README.md` | TypeScript types + mock fixtures so the frontend can start now |
 | `docs/agent-score.md` | Agent reputation rules + API |
+| `docs/pitch.md` | Investor pitch — problem, market, competition, financials, where AI is used |
 | `docs/business-model-early.md` | Who pays, pricing, why they stay |
 | `docs/customer-and-market-brief.md` | NGO landscape & competitors |
 | `docs/telegram-bot.md` | Telegram intake details |

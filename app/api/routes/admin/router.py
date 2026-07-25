@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 
 from app.api.routes.admin.dashboard import router as admin_dashboard_router
-from app.dependencies import admin_role_dependency
 from app.api.routes.admin.applications import (
     router as admin_applications_router,
 )
+from app.api.routes.admin.invites import router as admin_invites_router
 from app.api.routes.admin.reference_data import (
     router as admin_reference_data_router,
 )
@@ -15,6 +15,7 @@ from app.api.routes.admin.subscriptions import (
     enquiries_router as admin_enquiries_router,
     subscriptions_router as admin_subscriptions_router,
 )
+from app.dependencies import admin_role_dependency
 
 admin_router = APIRouter(
     prefix="/admin",
@@ -28,3 +29,4 @@ admin_router.include_router(admin_reviews_router)
 admin_router.include_router(admin_subscriptions_router)
 admin_router.include_router(admin_enquiries_router)
 admin_router.include_router(admin_plans_router)
+admin_router.include_router(admin_invites_router)

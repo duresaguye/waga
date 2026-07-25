@@ -53,5 +53,18 @@ class ContributorRepository:
         )
         return cast(AgentInviteCode | None, await self._session.scalar(statement))
 
+    async def get_invite_by_id(self, invite_id: UUID) -> AgentInviteCode | None:
+        return cast(
+            AgentInviteCode | None, await self._session.get(AgentInviteCode, invite_id)
+        )
+
+    async def list_invites(self, *, limit: int = 50) -> list[AgentInviteCode]:
+        statement = (
+            select(AgentInviteCode)
+            .order_by(AgentInviteCode.created_at.desc())
+            .limit(limit)
+        )
+        return list(await self._session.scalars(statement))
+
     def add_invite(self, invite: AgentInviteCode) -> None:
         self._session.add(invite)

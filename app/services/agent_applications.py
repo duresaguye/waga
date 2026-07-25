@@ -113,6 +113,8 @@ class AgentApplicationService:
                 banned=False,
             )
             self._contributors.add(contributor)
+            # Flush before linking application.contributor_id (FK to contributors).
+            await self._session.flush()
         else:
             contributor.is_agent = True
             contributor.kind = ContributorKind.AGENT

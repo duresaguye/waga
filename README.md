@@ -40,6 +40,12 @@ uv run waga-telegram-bot
 
 Default `WAGA_TELEGRAM_DRY_RUN=true` logs submissions locally. Set `false` for live API.
 
+Deploy bot on free Render web service (webhook): [`docs/deploy-bot-webhook.md`](docs/deploy-bot-webhook.md).
+
+## Track B (prices / affordability / heat / copilot)
+
+Read APIs for the NGO dashboard. Frontend guide: [`docs/frontend-track-b.md`](docs/frontend-track-b.md).
+
 ## Deploy (Render + GitHub)
 
 See [`docs/deploy-render.md`](docs/deploy-render.md). Blueprint: [`render.yaml`](render.yaml)
