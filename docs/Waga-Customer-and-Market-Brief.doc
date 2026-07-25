@@ -1,0 +1,174 @@
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:w="urn:schemas-microsoft-com:office:word"
+ xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>Waga Index — Customer &amp; Market Brief</title>
+<!--[if gte mso 9]>
+<xml>
+ <w:WordDocument>
+  <w:View>Print</w:View>
+ </w:WordDocument>
+</xml>
+<![endif]-->
+<style>
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; margin: 0.7in; }
+  h1 { font-size: 18pt; margin-top: 0; }
+  h2 { font-size: 13pt; margin-top: 16pt; margin-bottom: 6pt; }
+  h3 { font-size: 11pt; margin-top: 12pt; margin-bottom: 4pt; }
+  p { margin: 6pt 0; }
+  .note { font-style: italic; font-size: 10pt; color: #444; }
+  .quote { font-style: italic; margin: 10pt 0; }
+  table { border-collapse: collapse; width: 100%; margin: 8pt 0 12pt; font-size: 10pt; }
+  th, td { border: 1px solid #333; padding: 5pt 6pt; vertical-align: top; text-align: left; }
+  th { background: #f0f0f0; }
+  ul, ol { margin: 4pt 0 8pt 18pt; padding: 0; }
+  li { margin: 3pt 0; }
+</style>
+</head>
+<body>
+
+<h1>Waga Index — Customer &amp; Market Brief</h1>
+<p class="note">Draft research note (under 2 pages). Focus: what we build, who can pay, how NGOs get data today, and what we add.</p>
+
+<h2>1. What we are building</h2>
+<p><b>Waga</b> is a food-price index platform for Ethiopia.</p>
+<p>It collects structured market prices (start: Addis Ababa, 2 markets, 5 staples), reviews them, and publishes auditable <b>72-hour market-price index</b> values plus CSV/API exports.</p>
+<p>It is <b>not</b> a replacement for the official ESS Consumer Price Index. It is a <b>faster, market-level food price signal</b> with provenance (who submitted, when reviewed, how the index was computed).</p>
+<p><b>Phase 1 product surface</b></p>
+<ul>
+  <li>Public: simple “what does teff cost this week?” view (Amharic + English)</li>
+  <li>Institutional: authenticated API + CSV exports of accepted prices and index snapshots</li>
+</ul>
+
+<h2>2. Who can actually pay</h2>
+<p>Public users will not pay. Revenue comes from institutions that already budget for market monitoring, cash assistance design, procurement, or risk.</p>
+
+<table>
+  <tr>
+    <th>Priority</th>
+    <th>Customer</th>
+    <th>Why they pay</th>
+    <th>Likely product</th>
+  </tr>
+  <tr>
+    <td>A — near-term</td>
+    <td>Humanitarian / CVA orgs (WFP partners, IRC, CARE, Save the Children, ECWG NGOs)</td>
+    <td>Need frequent prices to set transfer values and check cash feasibility</td>
+    <td>API + CSV + weekly brief</td>
+  </tr>
+  <tr>
+    <td>A</td>
+    <td>Research / monitoring orgs (REACH-style users, universities, think tanks)</td>
+    <td>Need cleaner, auditable time series with methodology</td>
+    <td>Data license + exports</td>
+  </tr>
+  <tr>
+    <td>B</td>
+    <td>Institutional buyers (hotels, caterers, school feeding, hospitals, cooperatives, large traders)</td>
+    <td>Need wholesale benchmarks for procurement / bidding</td>
+    <td>Dashboard + alerts</td>
+  </tr>
+  <tr>
+    <td>B</td>
+    <td>Fintech / agribusiness / insurers</td>
+    <td>Need local food inflation inputs for products and risk</td>
+    <td>API subscription</td>
+  </tr>
+  <tr>
+    <td>C (later)</td>
+    <td>Government / ESS-adjacent users</td>
+    <td>May buy gap-filling or faster urban signals, not a rival CPI</td>
+    <td>Pilot / MoU, not first revenue</td>
+  </tr>
+</table>
+
+<p><b>Honest constraint:</b> many NGO price datasets are free today (JMMI, FEWS NET, HDX). Waga must sell <b>speed, specificity, audit trail, and API reliability</b> — not “prices exist.”</p>
+
+<h2>3. What NGOs need — and how they get it now</h2>
+
+<h3>What they need</h3>
+<ul>
+  <li>Prices for a Minimum Expenditure Basket (food + some non-food)</li>
+  <li>Market functionality (can traders restock? are markets open?)</li>
+  <li>Coverage in operational woredas, not only Addis</li>
+  <li>Enough quotes to set / adjust cash transfer values</li>
+  <li>Comparable medians by woreda / region / month</li>
+</ul>
+
+<h3>How they get it today</h3>
+<table>
+  <tr>
+    <th>Source</th>
+    <th>Who</th>
+    <th>Cadence</th>
+    <th>Limitation / opportunity</th>
+  </tr>
+  <tr>
+    <td>JMMI (REACH + ECWG)</td>
+    <td>Humanitarian partners via KoBo KIIs</td>
+    <td>~monthly; coverage varies (~70–100 of 1,142 woredas)</td>
+    <td>Slow vs daily retail; coverage depends on partners; not a consumer product</td>
+  </tr>
+  <tr>
+    <td>FEWS NET</td>
+    <td>Food-security early warning</td>
+    <td>Monthly staples / markets</td>
+    <td>Broad food-security use; not a live consumer index API</td>
+  </tr>
+  <tr>
+    <td>WFP VAM / HDX</td>
+    <td>WFP + open humanitarian data</td>
+    <td>Irregular / program-driven</td>
+    <td>Good for analysis; weak for “price in this market today”</td>
+  </tr>
+  <tr>
+    <td>ESS CPI</td>
+    <td>Ethiopian Statistics Service</td>
+    <td>Monthly official inflation</td>
+    <td>Authoritative but delayed and aggregated</td>
+  </tr>
+  <tr>
+    <td>FAO GIEWS / World Bank RTP</td>
+    <td>Global systems</td>
+    <td>Monthly / modeled</td>
+    <td>Useful macro; weak for city-market operations</td>
+  </tr>
+</table>
+
+<p><b>Gap Waga can fill:</b> near-real-time, named market + commodity cells, accepted/rejected review trail, and machine-readable export — starting where data density is highest (Addis), then expanding to hubs.</p>
+
+<h2>4. Public / “normal people” use (free layer)</h2>
+<p>Keep a thin public product so the brand is useful and shareable:</p>
+<ul>
+  <li>Current price for teff, wheat, maize, onion, cooking oil</li>
+  <li>“Up / down vs last week” in plain language</li>
+  <li>Amharic + English</li>
+  <li>No login for read-only market summary</li>
+</ul>
+<p>This is <b>distribution and trust</b>, not the business model. Paying customers fund collection quality and exports.</p>
+
+<h2>5. What we can add (differentiation)</h2>
+<p>Do <b>not</b> compete as “another monthly PDF.” Add:</p>
+<ol>
+  <li><b>Speed</b> — 72-hour rolling index vs monthly JMMI/CPI cycles</li>
+  <li><b>Auditability</b> — submission → review → index snapshot chain</li>
+  <li><b>API-first exports</b> — CSV/JSON for CVA tools and analysts</li>
+  <li><b>Named markets</b> — e.g. Ehil Berenda vs Atikilt Tera, not only “Addis Ababa”</li>
+  <li><b>Tight staple basket</b> — fewer items, higher refresh rate</li>
+  <li>Later (not v1): alerts when a cell jumps X%, contributor apps, regional hub expansion</li>
+</ol>
+
+<h2>6. Recommended positioning</h2>
+<p class="quote">“Waga is the audited, API-ready food price index for Ethiopian markets — free for the public to check staple prices, paid for NGOs and institutions that need faster, cleaner data than monthly surveys.”</p>
+
+<h2>7. Immediate next decisions</h2>
+<ol>
+  <li>Confirm Phase 1 markets + 5 commodities (proposed: Ehil Berenda, Atikilt Tera; teff, wheat, maize, onion, cooking oil).</li>
+  <li>Pick primary paying beachhead: CVA/NGO data users vs procurement buyers.</li>
+  <li>Design public free view vs paid export package.</li>
+  <li>Interview 3–5 Cash Working Group / NGO M&amp;E staff on what they still manually rebuild today.</li>
+</ol>
+
+</body>
+</html>

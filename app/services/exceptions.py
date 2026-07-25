@@ -56,3 +56,43 @@ class ReferenceDataNotFoundError(ReferenceDataError):
 
 class ReferenceDataConflictError(ReferenceDataError):
     pass
+
+
+class AgentScoreError(Exception):
+    """Base exception for agent score operations."""
+
+
+class AgentNotFoundError(AgentScoreError):
+    pass
+
+
+class AgentInviteInvalidError(AgentScoreError):
+    pass
+
+
+class AgentBannedError(AgentScoreError):
+    pass
+
+
+class AgentRedeemNotReadyError(AgentScoreError):
+    pass
+
+
+class AgentApplicationNotFoundError(AgentScoreError):
+    pass
+
+
+class AgentApplicationConflictError(AgentScoreError):
+    pass
+
+
+class SubmissionError(Exception):
+    """Base exception for submission operations."""
+
+
+class SubmissionValidationError(SubmissionError):
+    pass
+
+
+class SubmissionConflictError(SubmissionError):
+    pass

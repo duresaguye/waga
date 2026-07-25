@@ -1,7 +1,10 @@
 from app.models.admin import AuditLog, InviteToken, RateLimitEvent
 from app.models.auth import AuthSession, User
-from app.models.contributors import Contributor, ContributorConsent
+from app.models.agent_applications import AgentApplication, AgentApplicationStatus
+from app.models.contributors import AgentInviteCode, AgentScoreEvent, Contributor, ContributorConsent
+from app.models.reward_settings import AgentRedeemRequest, AgentRewardSettings
 from app.models.enums import (
+    AgentScoreEventType,
     ContributorKind,
     IndexStatus,
     InputMode,
@@ -26,6 +29,13 @@ from app.models.submissions import Submission
 from app.models.verification import SubmissionVerification
 
 __all__ = [
+    "AgentApplication",
+    "AgentApplicationStatus",
+    "AgentInviteCode",
+    "AgentRedeemRequest",
+    "AgentRewardSettings",
+    "AgentScoreEvent",
+    "AgentScoreEventType",
     "AuditLog",
     "AuthSession",
     "Commodity",

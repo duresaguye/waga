@@ -7,8 +7,18 @@ class ContributorKind(StrEnum):
     TEAM = "team"
 
 
+class AgentScoreEventType(StrEnum):
+    PENDING_SUBMIT = "pending_submit"
+    ACCEPTED = "accepted"
+    FLAGGED = "flagged"
+    REDEEM = "redeem"
+    ACTIVATE = "activate"
+    BAN = "ban"
+
+
 class InputMode(StrEnum):
     REST = "rest"
+    TELEGRAM = "telegram"
 
 
 class IndexStatus(StrEnum):

@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "waga-backend"
 version = "0.1.0"
@@ -14,12 +18,15 @@ dependencies = [
     "pwdlib[argon2]>=0.3.0",
     "pyjwt>=2.10.1",
     "python-multipart>=0.0.32",
+    "python-telegram-bot>=22.5",
     "sqlalchemy>=2.0.51",
     "uvicorn[standard]>=0.51.0",
 ]
 
 [project.scripts]
 waga-create-admin = "app.commands.create_admin:main"
+waga-seed-phase1 = "app.commands.seed_phase1:main"
+waga-telegram-bot = "telegram_bot.bot:main"
 
 [dependency-groups]
 dev = [
@@ -30,7 +37,7 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["app*"]
+include = ["app*", "telegram_bot*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

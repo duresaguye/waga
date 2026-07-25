@@ -321,4 +321,16 @@ WAGA_METHOD_VERSION=v1
 - Current, series, comparison, coverage, feed, and CSV APIs expose supporting metadata.
 - Supabase credentials are environment-only and migrations use the direct connection.
 - A full rebuild reproduces the same derived values.
-- No Telegram, voice, ASR, LLM, or automatic verification implementation is introduced.
+- Telegram structured intake bot is scaffolded in `telegram_bot/` (dry-run until submissions API).
+- No voice, ASR, LLM, or automatic verification implementation is introduced.
+
+## Telegram Intake Phase (approved)
+
+Add a separate Telegram bot process for voluntary Addis Ababa price submissions:
+
+1. Consent → market → commodity → numeric price → confirm.
+2. Phase 1 markets: Ehil Berenda, Atikilt Tera.
+3. Phase 1 commodities: teff (mixed), wheat, maize, onion, cooking oil.
+4. Bot posts to `POST /api/v1/submissions` once that route exists; until then dry-run logging.
+5. Add `input_mode=telegram` when wiring the submissions API.
+6. Voice notes via Addis AI STT remain a later enhancement with mandatory confirm.
