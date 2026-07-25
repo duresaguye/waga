@@ -179,7 +179,9 @@ class AgentScoreService:
             await self._session.refresh(contributor)
         return contributor
 
-    async def apply_review(self, telegram_id: str, *, accepted: bool) -> Contributor:
+    async def apply_review(
+        self, telegram_id: str, *, accepted: bool, commit: bool = True
+    ) -> Contributor:
         contributor = await self.ensure_agent(telegram_id)
         if accepted:
             contributor.accepted_count += 1
@@ -206,8 +208,9 @@ class AgentScoreService:
             )
             self._refresh_ban(contributor)
 
-        await self._session.commit()
-        await self._session.refresh(contributor)
+        if commit:
+            await self._session.commit()
+            await self._session.refresh(contributor)
         return contributor
 
     async def redeem(

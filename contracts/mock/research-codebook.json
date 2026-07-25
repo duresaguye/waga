@@ -1,0 +1,219 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-index-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "dataset": "waga_addis_market_prices_panel",
+    "method_version": "waga-index-v1",
+    "columns": [
+      {
+        "name": "date",
+        "type": "date",
+        "unit": null,
+        "hxl_tag": "#date",
+        "description": "Observation date of the index window end.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "admin1",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#adm1+name",
+        "description": "First-level administrative unit.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "admin2",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#adm2+name",
+        "description": "Second-level administrative unit.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "market",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#loc+market+name",
+        "description": "Named marketplace within the city.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "latitude",
+        "type": "number",
+        "unit": "degrees",
+        "hxl_tag": "#geo+lat",
+        "description": "Market latitude, WGS84.",
+        "allowed_values": null,
+        "nullable": true
+      },
+      {
+        "name": "longitude",
+        "type": "number",
+        "unit": "degrees",
+        "hxl_tag": "#geo+lon",
+        "description": "Market longitude, WGS84.",
+        "allowed_values": null,
+        "nullable": true
+      },
+      {
+        "name": "category",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#item+type",
+        "description": "WFP commodity category.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "commodity",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#item+name",
+        "description": "Commodity name in English.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "unit",
+        "type": "enum",
+        "unit": null,
+        "hxl_tag": "#item+unit",
+        "description": "Unit the price refers to.",
+        "allowed_values": [
+          "KG",
+          "L"
+        ],
+        "nullable": false
+      },
+      {
+        "name": "priceflag",
+        "type": "enum",
+        "unit": null,
+        "hxl_tag": "#item+price+flag",
+        "description": "Always 'actual'. Waga never forecasts or models prices.",
+        "allowed_values": [
+          "actual"
+        ],
+        "nullable": false
+      },
+      {
+        "name": "pricetype",
+        "type": "enum",
+        "unit": null,
+        "hxl_tag": "#item+price+type",
+        "description": "Always 'Retail' in v1.",
+        "allowed_values": [
+          "Retail"
+        ],
+        "nullable": false
+      },
+      {
+        "name": "currency",
+        "type": "enum",
+        "unit": null,
+        "hxl_tag": "#currency",
+        "description": "ISO 4217 currency of the price column.",
+        "allowed_values": [
+          "ETB"
+        ],
+        "nullable": false
+      },
+      {
+        "name": "price",
+        "type": "number",
+        "unit": "ETB",
+        "hxl_tag": "#value",
+        "description": "Weighted median accepted price. Empty when status is insufficient_data.",
+        "allowed_values": null,
+        "nullable": true
+      },
+      {
+        "name": "usdprice",
+        "type": "number",
+        "unit": "USD",
+        "hxl_tag": "#value+usd",
+        "description": "Price converted at the reference rate. Empty when price is empty.",
+        "allowed_values": null,
+        "nullable": true
+      },
+      {
+        "name": "n_submissions",
+        "type": "number",
+        "unit": "count",
+        "hxl_tag": "#meta+count",
+        "description": "Accepted submissions inside the window.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "n_contributors",
+        "type": "number",
+        "unit": "count",
+        "hxl_tag": "#meta+contributors",
+        "description": "Distinct contributors behind those submissions.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "source_mix",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#meta+sources",
+        "description": "Pipe-separated source:count pairs, e.g. 'agent:6|user:1'.",
+        "allowed_values": null,
+        "nullable": true
+      },
+      {
+        "name": "status",
+        "type": "enum",
+        "unit": null,
+        "hxl_tag": "#status+code",
+        "description": "Whether the cell met the publication threshold.",
+        "allowed_values": [
+          "published",
+          "insufficient_data"
+        ],
+        "nullable": false
+      },
+      {
+        "name": "method_version",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#meta+method",
+        "description": "Index method that produced this row. Frozen once published.",
+        "allowed_values": null,
+        "nullable": false
+      },
+      {
+        "name": "snapshot_id",
+        "type": "string",
+        "unit": null,
+        "hxl_tag": "#meta+snapshot",
+        "description": "Immutable snapshot this row belongs to.",
+        "allowed_values": null,
+        "nullable": false
+      }
+    ]
+  }
+}

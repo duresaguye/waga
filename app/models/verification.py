@@ -78,6 +78,11 @@ class SubmissionVerification(Base):
     reviewer_label: Mapped[str | None] = mapped_column(String(120))
     reason_code: Mapped[str | None] = mapped_column(String(64))
     reason: Mapped[str | None] = mapped_column(Text)
+    ai_verdict: Mapped[str | None] = mapped_column(String(16))
+    ai_confidence: Mapped[str | None] = mapped_column(String(16))
+    ai_reason: Mapped[str | None] = mapped_column(Text)
+    ai_model: Mapped[str | None] = mapped_column(String(64))
+    ai_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

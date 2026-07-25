@@ -241,6 +241,10 @@ If this story works end-to-end, the MVP is successful.
 |---|---|
 | **`docs/WHAT_WE_ARE_BUILDING.md`** | **This file — product truth for agents** |
 | **`docs/WORK_SPLIT.md`** | **Backend ownership — Track A vs Track B (avoid double work)** |
+| **`docs/api-contracts-v1.md`** | **Frozen read-API contract — Track B builds it, frontend codes to it** |
+| `docs/data-products-research.md` | What NGOs, businesses and researchers need, and what they use today |
+| `docs/business-segment.md` | Second segment — sourcing & input-cost intelligence (not site selection) |
+| `contracts/README.md` | TypeScript types + mock fixtures so the frontend can start now |
 | `docs/agent-score.md` | Agent reputation rules + API |
 | `docs/business-model-early.md` | Who pays, pricing, why they stay |
 | `docs/customer-and-market-brief.md` | NGO landscape & competitors |

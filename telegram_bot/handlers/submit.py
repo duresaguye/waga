@@ -16,6 +16,7 @@ from telegram.ext import (
 
 from telegram_bot.keyboards import (
     other_market_prompt_keyboard,
+    other_market_voice_lang_keyboard,
     voice_label_confirm_keyboard,
     agent_menu_keyboard,
     commodities_keyboard,
@@ -157,14 +158,12 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "Waga market agent bot\n\n"
         "Join:\n"
         "1) /apply — name, phone, city, market, visit schedule\n"
-        "2) Wait for admin approval\n"
-        "3) Or /agent CODE if the team already invited you\n\n"
-        "For approved agents:\n"
+        "2) Or /agent CODE if you already have an invite\n\n"
+        "Commands:\n"
         "• /submit — report a market price\n"
         "• /score — view score\n"
         "• /redeem — redeem score for birr rewards\n"
         "• /cancel — cancel current flow\n\n"
-        "Score comes from accepted reports and can be redeemed.\n\n"
         f"Need help? Call {help_phone}",
         reply_markup=agent_menu_keyboard() if is_agent else guest_menu_keyboard(),
     )
@@ -251,13 +250,14 @@ async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                 reply_markup=agent_menu_keyboard(),
             )
             return
+        pending = int(data.get("pending_count", 0) or 0)
+        accepted = int(data.get("accepted_count", 0) or 0)
         text = (
-            "📊 Agent score\n"
+            "Agent score\n"
             f"• Score: {data.get('score', 0)}\n"
             f"• Status: {data.get('status', 'Active')}\n"
-            f"• Pending review: {data.get('pending_count', 0)}\n"
-            f"• Accepted reports: {data.get('accepted_count', 0)}\n"
-            f"• Flagged: {data.get('flagged_count', 0)}\n"
+            f"• Reports sent: {pending + accepted}\n"
+            f"• Accepted: {accepted}\n"
             f"• Redeemed so far: {data.get('redeemed_total', 0)}\n"
             f"• Redeem from {data.get('redeem_threshold', 50)} points"
         )
@@ -412,14 +412,10 @@ async def market_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     context.user_data.pop("market_label", None)
 
     if market.code == OTHER_MARKET_CODE:
-        await query.edit_message_text("Other market selected.")
+        await query.edit_message_text("Other market")
         assert query.message is not None
         await query.message.reply_text(
-            "Other market — send a voice note with the market name.\n"
-            "1) Tap Amharic voice or Oromo voice\n"
-            "2) Record and send\n"
-            "3) Tap Use this name\n"
-            "4) Choose food + price, then Confirm to submit",
+            "How do you want to enter the market name?",
             reply_markup=other_market_prompt_keyboard(prefix="voice_mkt"),
         )
         return SubmitState.MARKET_OTHER
@@ -455,12 +451,28 @@ async def market_other_lang_callback(
     data = query.data or ""
     if data == "cancel":
         return await cancel(update, context)
+    if data == "voice_mkt:mode:type":
+        await query.edit_message_text(
+            "Type the market name in Amharic, Afaan Oromo, or English."
+        )
+        return SubmitState.MARKET_OTHER
+    if data == "voice_mkt:mode:choose":
+        await query.edit_message_text(
+            "How do you want to enter the market name?",
+            reply_markup=other_market_prompt_keyboard(prefix="voice_mkt"),
+        )
+        return SubmitState.MARKET_OTHER
+    if data == "voice_mkt:mode:voice":
+        await query.edit_message_text(
+            "Choose language, then send a voice note with the market name.",
+            reply_markup=other_market_voice_lang_keyboard(prefix="voice_mkt"),
+        )
+        return SubmitState.MARKET_OTHER
     if data.startswith("voice_mkt:lang:"):
         lang = data.rsplit(":", 1)[-1]
         context.user_data["voice_lang"] = lang
         await query.edit_message_text(
-            f"Language: {lang}.\n"
-            "Now send a voice note saying the market name."
+            "Language set.\nSend a voice note with the market name now."
         )
     return SubmitState.MARKET_OTHER
 
@@ -470,13 +482,13 @@ async def market_other_voice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     settings = _settings(context)
     if not settings.addis_stt_enabled():
         await update.effective_message.reply_text(
-            "Voice notes need Addis AI.\n"
-            "Set WAGA_ADDIS_AI_API_KEY in .env, or type the market name."
+            "Voice is unavailable right now.\n"
+            "Please type the market name instead."
         )
         return SubmitState.MARKET_OTHER
 
     lang = str(context.user_data.get("voice_lang") or settings.addis_ai_default_lang)
-    await update.effective_message.reply_text(f"Transcribing with Addis AI ({lang})...")
+    await update.effective_message.reply_text("Listening to your voice note...")
     try:
         result = await transcribe_message_audio(
             bot=context.bot,
@@ -527,7 +539,7 @@ async def market_other_voice_confirm(
         lang = data.rsplit(":", 1)[-1]
         context.user_data["voice_lang"] = lang
         await query.edit_message_text(
-            f"Voice language set to {lang}.\nSend a voice note with the market name."
+            "Send a voice note with the market name now."
         )
         return SubmitState.MARKET_OTHER
 
@@ -668,19 +680,10 @@ async def confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     can_redeem = False
     if isinstance(profile, ContributorReputation):
         can_redeem = profile.can_redeem()
-        score_bit = (
-            f"\n📊 Score: {profile.score} ({profile.status_label()})\n"
-            f"Pending review: {profile.pending_count}\n"
-        )
+        score_bit = f"\nScore: {profile.score}"
 
-    status = result.get("status", "pending_review")
     await query.edit_message_text(
-        "Report received and waiting for review.\n"
-        f"Status: {status}\n"
-        f"{score_bit}\n"
-        "Accepted reports raise redeemable score.\n"
-        "Flagged reports lower score.\n\n"
-        "Use /score or Redeem score when ready."
+        f"Price report submitted. Thank you!{score_bit}"
     )
     if query.message is not None:
         await query.message.reply_text(
@@ -761,7 +764,7 @@ def register_submit_handlers(application: Application) -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, market_other_message),
                 MessageHandler(filters.VOICE | filters.AUDIO, market_other_voice),
                 CallbackQueryHandler(
-                    market_other_lang_callback, pattern=r"^(voice_mkt:lang:.+|cancel)$"
+                    market_other_lang_callback, pattern=r"^(voice_mkt:(mode|lang):.+|cancel)$"
                 ),
             ],
             SubmitState.MARKET_OTHER_CONFIRM: [

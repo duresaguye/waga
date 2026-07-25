@@ -27,6 +27,7 @@ from telegram_bot.keyboards import (
     apply_subcity_keyboard,
     guest_menu_keyboard,
     other_market_prompt_keyboard,
+    other_market_voice_lang_keyboard,
     voice_label_confirm_keyboard,
 )
 from telegram_bot.reference import OTHER_MARKET_CODE
@@ -182,12 +183,10 @@ async def apply_market(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     code = (query.data or "").removeprefix("apply_market:")
     context.user_data["apply"]["preferred_market_code"] = code
     if code == OTHER_MARKET_CODE:
-        await query.edit_message_text("Other market selected.")
+        await query.edit_message_text("Other market")
         assert query.message is not None
         await query.message.reply_text(
-            "Type the market name in Amharic, Afaan Oromo, or English.\n"
-            "Example: Autobis Tera\n\n"
-            "Or send a voice note - Addis AI will transcribe it.",
+            "How do you want to enter the market name?",
             reply_markup=other_market_prompt_keyboard(prefix="apply_voice"),
         )
         return ApplyState.MARKET_OTHER
@@ -218,21 +217,38 @@ async def apply_market_other(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 
-async def apply_market_other_lang(
+async def apply_market_other_mode(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
     query = update.callback_query
     assert query is not None
     await query.answer()
     data = query.data or ""
+    apply_data = context.user_data.setdefault("apply", {})
     if data == "apply_cancel":
         return await apply_cancel(update, context)
+    if data == "apply_voice:mode:type":
+        await query.edit_message_text(
+            "Type the market name in Amharic, Afaan Oromo, or English."
+        )
+        return ApplyState.MARKET_OTHER
+    if data == "apply_voice:mode:choose":
+        await query.edit_message_text(
+            "How do you want to enter the market name?",
+            reply_markup=other_market_prompt_keyboard(prefix="apply_voice"),
+        )
+        return ApplyState.MARKET_OTHER
+    if data == "apply_voice:mode:voice":
+        await query.edit_message_text(
+            "Choose language, then send a voice note with the market name.",
+            reply_markup=other_market_voice_lang_keyboard(prefix="apply_voice"),
+        )
+        return ApplyState.MARKET_OTHER
     if data.startswith("apply_voice:lang:"):
         lang = data.rsplit(":", 1)[-1]
-        context.user_data.setdefault("apply", {})["voice_lang"] = lang
+        apply_data["voice_lang"] = lang
         await query.edit_message_text(
-            f"Voice language set to {lang}.\n"
-            "Send a voice note now, or type the market name."
+            "Language set.\nSend a voice note with the market name now."
         )
     return ApplyState.MARKET_OTHER
 
@@ -244,14 +260,14 @@ async def apply_market_other_voice(
     settings = _settings(context)
     if not settings.addis_stt_enabled():
         await update.effective_message.reply_text(
-            "Voice notes need Addis AI.\n"
-            "Set WAGA_ADDIS_AI_API_KEY in .env, or type the market name."
+            "Voice is unavailable right now.\n"
+            "Please type the market name instead."
         )
         return ApplyState.MARKET_OTHER
 
     apply_data = context.user_data.setdefault("apply", {})
     lang = str(apply_data.get("voice_lang") or settings.addis_ai_default_lang)
-    await update.effective_message.reply_text(f"Transcribing with Addis AI ({lang})...")
+    await update.effective_message.reply_text("Listening to your voice note...")
     try:
         result = await transcribe_message_audio(
             bot=context.bot,
@@ -265,14 +281,14 @@ async def apply_market_other_voice(
     except Exception:
         logger.exception("Apply voice transcription failed")
         await update.effective_message.reply_text(
-            "Could not transcribe that voice note. Type the market name instead."
+            "Could not read that voice note. Type the market name instead."
         )
         return ApplyState.MARKET_OTHER
 
     label = result.text.strip()
     if len(label) < 2:
         await update.effective_message.reply_text(
-            "I could not hear a clear market name. Please try again or type it."
+            "I could not hear a clear market name. Please send the voice note again."
         )
         return ApplyState.MARKET_OTHER
 
@@ -303,12 +319,12 @@ async def apply_market_other_voice_confirm(
         lang = data.rsplit(":", 1)[-1]
         apply_data["voice_lang"] = lang
         await query.edit_message_text(
-            f"Voice language set to {lang}.\nSend a voice note with the market name."
+            "Language set.\nSend a voice note with the market name now."
         )
         return ApplyState.MARKET_OTHER
 
     if data == "apply_voice:retry":
-        await query.edit_message_text("Send another voice note, or type the market name.")
+        await query.edit_message_text("Send another voice note with the market name.")
         return ApplyState.MARKET_OTHER
 
     if data == "apply_voice:type":
@@ -455,11 +471,7 @@ async def apply_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     if settings.telegram_dry_run:
         logger.info("Dry-run agent application: %s", payload)
-        await query.edit_message_text(
-            "Application received (dry-run).\n"
-            "In live mode the team reviews it in admin.\n"
-            "You cannot submit prices until approved."
-        )
+        await query.edit_message_text("Application submitted. Thank you!")
         context.user_data.pop("apply", None)
         return ConversationHandler.END
 
@@ -477,16 +489,12 @@ async def apply_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     except Exception:
         logger.exception("Failed to submit application")
         await query.edit_message_text(
-            "Could not send application. Is the backend running?"
+            "Could not send application. Please try again."
         )
         context.user_data.pop("apply", None)
         return ConversationHandler.END
 
-    await query.edit_message_text(
-        "Application submitted.\n"
-        "Status: pending review.\n"
-        "We will approve you before you can submit prices and earn score."
-    )
+    await query.edit_message_text("Application submitted. Thank you!")
     context.user_data.pop("apply", None)
     return ConversationHandler.END
 
@@ -546,8 +554,8 @@ def register_apply_handlers(application: Application) -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, apply_market_other),
                 MessageHandler(filters.VOICE | filters.AUDIO, apply_market_other_voice),
                 CallbackQueryHandler(
-                    apply_market_other_lang,
-                    pattern=r"^(apply_voice:lang:.+|apply_cancel)$",
+                    apply_market_other_mode,
+                    pattern=r"^(apply_voice:(mode|lang):.+|apply_cancel)$",
                 ),
             ],
             ApplyState.MARKET_OTHER_CONFIRM: [

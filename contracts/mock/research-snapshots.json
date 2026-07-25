@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-index-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "snapshots": [
+      {
+        "snapshot_id": "snap_2026-07-25T06_v1",
+        "created_at": "2026-07-25T06:00:00Z",
+        "method_version": "waga-index-v1",
+        "temporal_coverage": {
+          "start": "2026-04-27",
+          "end": "2026-07-25"
+        },
+        "spatial_coverage": {
+          "city": "addis_ababa",
+          "markets": 9
+        },
+        "commodities": 5,
+        "row_count": 4050,
+        "rows_published": 3754,
+        "rows_insufficient": 296,
+        "licence": "CC-BY-4.0",
+        "checksum_sha256": "777fe3da0bcf17d5c186f755e5d25e7f25d99f2c888e2cb0cb9852c31c4aea1e",
+        "citation": "Waga Intelligence (2026). Addis Ababa Market Price Index, snapshot snap_2026-07-25T06_v1. https://waga.et/data/snap_2026-07-25T06_v1",
+        "download": {
+          "csv": "/api/v1/exports/panel.csv?snapshot=snap_2026-07-25T06_v1",
+          "parquet": null
+        },
+        "immutable": true
+      }
+    ]
+  }
+}

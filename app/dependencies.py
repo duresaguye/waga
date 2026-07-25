@@ -24,6 +24,7 @@ from app.services.agent_score import AgentScoreService
 from app.services.auth import AuthService
 from app.services.exceptions import InvalidAccessTokenError
 from app.services.reference_data import ReferenceDataService
+from app.services.reviews import ReviewService
 from app.services.submissions import SubmissionService
 
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -131,6 +132,15 @@ def get_submission_service(
     return SubmissionService(
         session, submissions, reference_data, contributors, scores
     )
+
+
+def get_review_service(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    submissions: Annotated[SubmissionRepository, Depends(get_submission_repository)],
+    scores: Annotated[AgentScoreService, Depends(get_agent_score_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> ReviewService:
+    return ReviewService(session, submissions, scores, settings)
 
 
 @lru_cache

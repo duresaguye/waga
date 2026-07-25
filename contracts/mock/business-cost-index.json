@@ -1,0 +1,517 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-cost-index-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "method_version": "waga-cost-index-v1",
+    "base_date": "2026-04-27",
+    "base_value": 100.0,
+    "current_value": 130.32,
+    "change_pct_30d": 19.0,
+    "monthly_cost_now_etb": 65997.8,
+    "monthly_cost_base_etb": 50643.4,
+    "volatility_30d_pct": 5.0,
+    "planning_band": {
+      "low_etb": 56065.37,
+      "high_etb": 63696.23,
+      "confidence": 0.8
+    },
+    "items": [
+      {
+        "commodity_code": "teff_mixed",
+        "quantity": 400,
+        "unit": "kg",
+        "unit_price": 113.63,
+        "cost_etb": 45452.0,
+        "share_pct": 68.9,
+        "status": "published"
+      },
+      {
+        "commodity_code": "wheat",
+        "quantity": 120,
+        "unit": "kg",
+        "unit_price": 69.21,
+        "cost_etb": 8305.2,
+        "share_pct": 12.6,
+        "status": "published"
+      },
+      {
+        "commodity_code": "cooking_oil",
+        "quantity": 60,
+        "unit": "liter",
+        "unit_price": 204.01,
+        "cost_etb": 12240.6,
+        "share_pct": 18.5,
+        "status": "published"
+      }
+    ],
+    "series": [
+      {
+        "date": "2026-04-27",
+        "value": 100.0,
+        "status": "published"
+      },
+      {
+        "date": "2026-04-28",
+        "value": 100.19,
+        "status": "published"
+      },
+      {
+        "date": "2026-04-29",
+        "value": 100.87,
+        "status": "published"
+      },
+      {
+        "date": "2026-04-30",
+        "value": 101.29,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-01",
+        "value": 100.95,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-02",
+        "value": 100.93,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-03",
+        "value": 101.3,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-04",
+        "value": 101.53,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-05",
+        "value": 101.36,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-06",
+        "value": 101.43,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-07",
+        "value": 100.75,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-08",
+        "value": 103.44,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-09",
+        "value": 102.58,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-10",
+        "value": 101.52,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-11",
+        "value": 101.65,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-12",
+        "value": 102.84,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-13",
+        "value": 103.75,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-14",
+        "value": 103.57,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-15",
+        "value": 103.59,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-16",
+        "value": 102.69,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-17",
+        "value": 103.33,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-18",
+        "value": 103.57,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-19",
+        "value": 103.15,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-20",
+        "value": 104.82,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-21",
+        "value": 104.63,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-22",
+        "value": 105.17,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-23",
+        "value": 105.37,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-24",
+        "value": 105.63,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-25",
+        "value": 105.34,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-26",
+        "value": 105.38,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-27",
+        "value": 104.54,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-28",
+        "value": 103.65,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-29",
+        "value": 104.72,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-30",
+        "value": 104.16,
+        "status": "published"
+      },
+      {
+        "date": "2026-05-31",
+        "value": 105.43,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-01",
+        "value": 105.14,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-02",
+        "value": 105.39,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-03",
+        "value": 105.77,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-04",
+        "value": 105.88,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-05",
+        "value": 105.87,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-06",
+        "value": 106.52,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-07",
+        "value": 106.6,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-08",
+        "value": 106.24,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-09",
+        "value": 106.66,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-10",
+        "value": 107.85,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-11",
+        "value": 107.1,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-12",
+        "value": 107.04,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-13",
+        "value": 107.71,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-14",
+        "value": 106.76,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-15",
+        "value": 106.75,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-16",
+        "value": 107.36,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-17",
+        "value": 107.54,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-18",
+        "value": 107.45,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-19",
+        "value": 107.05,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-20",
+        "value": 107.36,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-21",
+        "value": 107.55,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-22",
+        "value": 107.9,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-23",
+        "value": 108.59,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-24",
+        "value": 108.19,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-25",
+        "value": 109.55,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-26",
+        "value": 109.26,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-27",
+        "value": 109.91,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-28",
+        "value": 110.78,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-29",
+        "value": 111.21,
+        "status": "published"
+      },
+      {
+        "date": "2026-06-30",
+        "value": 112.15,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-01",
+        "value": 112.86,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-02",
+        "value": 113.15,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-03",
+        "value": 113.67,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-04",
+        "value": 114.99,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-05",
+        "value": 114.64,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-06",
+        "value": 116.57,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-07",
+        "value": 115.94,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-08",
+        "value": 117.18,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-09",
+        "value": 118.24,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-10",
+        "value": 118.24,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-11",
+        "value": 118.39,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-12",
+        "value": 120.3,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-13",
+        "value": 121.02,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-14",
+        "value": 120.17,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-15",
+        "value": 121.53,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-16",
+        "value": 122.86,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-17",
+        "value": 122.5,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-18",
+        "value": 122.4,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-19",
+        "value": 123.79,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-20",
+        "value": 124.47,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-21",
+        "value": 125.66,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-22",
+        "value": 126.21,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-23",
+        "value": 128.15,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-24",
+        "value": 127.42,
+        "status": "published"
+      },
+      {
+        "date": "2026-07-25",
+        "value": 130.32,
+        "status": "published"
+      }
+    ]
+  }
+}

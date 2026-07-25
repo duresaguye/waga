@@ -36,11 +36,11 @@ If you need a shared contract change, update **Shared contracts** below first, t
 ### Own these deliverables
 1. `POST /api/v1/submissions` — structured create (REST + Telegram payload)
 2. Contributor resolve + consent recording
-3. Review APIs: list pending, accept, flag
+3. Review APIs: list pending, accept, flag (**done** — `/api/v1/admin/reviews/*` + AI assist; see `docs/ai-review-assist.md`)
 4. **Approved agents only:** allowlist + invite codes; block public submit-for-score
 5. **Agent score backend (done for v1):** see **`docs/agent-score.md`** for full how-it-works  
    - migrate `0004`, `/api/v1/agents/*`, bot dry-run + live API  
-   - next: review service should call `apply_review` on accept/flag
+   - review service calls `apply_review` on accept/flag
 6. Add `input_mode=telegram` (enum + migration if needed)
 7. Seed Phase 1 markets + commodities (Ehil Berenda, Atikilt Tera, 5 staples)
 8. Wire `telegram_bot` → real API (`WAGA_TELEGRAM_DRY_RUN=false`)
@@ -186,8 +186,13 @@ Daily sync (15 min): contracts only — schema changes, migration order, demo da
 
 ## Frontend note
 
-Dashboard (React/Next) is **not** in this backend split. Either a third person or later.  
-Backend ships JSON that the demo story needs; mock UI is OK until frontend starts.
+Dashboard (React/Next) is **not** in this backend split. Either a third person or later.
+
+The frontend no longer waits for Track B. The read-API contract is frozen in
+[`docs/api-contracts-v1.md`](api-contracts-v1.md), with TypeScript types and realistic mock
+fixtures in [`contracts/`](../contracts/README.md). Frontend builds against the fixtures; Track B
+implements the same shapes. **Track B must match the contract** — if a shape needs to change,
+change the contract file first and say so in chat.
 
 ---
 

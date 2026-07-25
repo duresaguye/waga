@@ -1,0 +1,98 @@
+{
+  "meta": {
+    "generated_at": "2026-07-25T06:00:00Z",
+    "method_version": "waga-affordability-v1",
+    "city": "addis_ababa",
+    "currency": "ETB",
+    "window": {
+      "start": "2026-07-22T06:00:00Z",
+      "end": "2026-07-25T06:00:00Z",
+      "hours": 72
+    },
+    "coverage": {
+      "cells_expected": 45,
+      "cells_published": 36,
+      "cells_insufficient": 9,
+      "coverage_pct": 80.0
+    },
+    "licence_class": "commercial_permitted",
+    "snapshot_id": "snap_2026-07-25T06_v1"
+  },
+  "data": {
+    "basket_code": "phase1_staple5",
+    "household_size": 5,
+    "period_days": 30,
+    "status": "published",
+    "cost_now": 4923.64,
+    "cost_prior": 4142.35,
+    "prior_date": "2026-06-25",
+    "change_abs": 781.29,
+    "change_pct": 18.9,
+    "score": 5.5,
+    "band": "Severe",
+    "method_version": "waga-affordability-v1",
+    "items": [
+      {
+        "commodity_code": "teff_mixed",
+        "quantity": 25,
+        "unit": "kg",
+        "unit_price_now": 113.63,
+        "unit_price_prior": 96.33,
+        "cost_now": 2840.75,
+        "cost_prior": 2408.25,
+        "change_pct": 18.0,
+        "contribution_to_change_pct": 55.4,
+        "status": "published"
+      },
+      {
+        "commodity_code": "wheat",
+        "quantity": 10,
+        "unit": "kg",
+        "unit_price_now": 69.21,
+        "unit_price_prior": 59.64,
+        "cost_now": 692.1,
+        "cost_prior": 596.4,
+        "change_pct": 16.0,
+        "contribution_to_change_pct": 12.2,
+        "status": "published"
+      },
+      {
+        "commodity_code": "maize",
+        "quantity": 10,
+        "unit": "kg",
+        "unit_price_now": 43.97,
+        "unit_price_prior": 40.84,
+        "cost_now": 439.7,
+        "cost_prior": 408.4,
+        "change_pct": 7.7,
+        "contribution_to_change_pct": 4.0,
+        "status": "published"
+      },
+      {
+        "commodity_code": "onion",
+        "quantity": 6,
+        "unit": "kg",
+        "unit_price_now": 56.51,
+        "unit_price_prior": 39.95,
+        "cost_now": 339.06,
+        "cost_prior": 239.7,
+        "change_pct": 41.5,
+        "contribution_to_change_pct": 12.7,
+        "status": "published"
+      },
+      {
+        "commodity_code": "cooking_oil",
+        "quantity": 3,
+        "unit": "liter",
+        "unit_price_now": 204.01,
+        "unit_price_prior": 163.2,
+        "cost_now": 612.03,
+        "cost_prior": 489.6,
+        "change_pct": 25.0,
+        "contribution_to_change_pct": 15.7,
+        "status": "published"
+      }
+    ],
+    "missing_commodities": []
+  }
+}

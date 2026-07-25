@@ -82,8 +82,7 @@ class AgentRegistry:
         return (
             "To join as a market agent:\n"
             "1) Tap Apply to be agent\n"
-            "2) Wait for team approval\n\n"
-            "Or tap Enter invite code if the team already gave you one."
+            "2) Or tap Enter invite code if you already have one."
         )
 
     def join_prompt(self) -> str:
