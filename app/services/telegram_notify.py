@@ -51,7 +51,6 @@ async def notify_agent_approved(*, telegram_id: str, full_name: str) -> bool:
         "You can submit prices now:\n"
         "• Open this bot\n"
         "• Tap Submit price (or /submit)\n"
-        "• Earn score when reports are accepted\n\n"
-        "No invite code needed."
+        "• Earn score when reports are accepted"
     )
     return await notify_telegram_user(telegram_id, text)
