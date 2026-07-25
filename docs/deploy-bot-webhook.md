@@ -46,7 +46,22 @@ After deploy, logs should show:
 
 Open `https://<bot>.onrender.com/health` → should return `ok`.
 
-## 5. Important
+## 5. Approval flow (no invite code required)
+
+1. Guest applies in Telegram (`/apply`).
+2. Admin approves in Swagger: `POST /admin/agent-applications/{id}/approve`.
+3. API creates `is_agent=true` in the DB and (if configured) DMs the user in Telegram.
+4. Agent opens the bot → `/start` or **Submit price** — bot syncs from API, no invite code.
+
+For the approval DM, set the **same** BotFather token on the **API** web service:
+
+| Key | Value |
+|---|---|
+| `WAGA_TELEGRAM_BOT_TOKEN` | same token as the bot service |
+
+Invite codes (`/agent CODE`) remain an optional shortcut for people you onboard offline.
+
+## 6. Important
 
 - **Stop any local bot** (polling and webhook conflict).
 - First message after sleep may be slow (cold start).

@@ -40,6 +40,7 @@ git push origin feat/agent-intake-submissions
 | `WAGA_TELEGRAM_BOT_TOKEN` | BotFather token |
 | `WAGA_ADDIS_AI_API_KEY` | Same Addis key (voice) |
 | `WAGA_TELEGRAM_AGENT_IDS` | Optional pre-approved Telegram user IDs |
+| `WAGA_TELEGRAM_BOT_TOKEN` | Same BotFather token as bot service (API DMs on approve) |
 
 `WAGA_API_BASE_URL` is built automatically from the API’s `RENDER_EXTERNAL_URL` + `/api/v1` via `scripts/start-bot.sh`. Override with `WAGA_API_BASE_URL` if needed.
 

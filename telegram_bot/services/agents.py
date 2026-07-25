@@ -43,6 +43,22 @@ class AgentRegistry:
     def get(self, telegram_user_id: int) -> AgentProfile | None:
         return self._activated.get(telegram_user_id)
 
+    def mark_approved(
+        self,
+        telegram_user_id: int,
+        *,
+        display_name: str | None = None,
+        via: str = "admin_approve",
+    ) -> None:
+        """Mirror API-approved agent into the in-memory registry for this process."""
+        self._activated[telegram_user_id] = AgentProfile(
+            telegram_user_id=telegram_user_id,
+            display_name=display_name,
+            onboarded_via=via,
+            active=True,
+        )
+        self._allowed_ids.add(telegram_user_id)
+
     def activate_with_invite(
         self,
         telegram_user_id: int,

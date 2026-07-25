@@ -16,6 +16,7 @@ from app.services.exceptions import (
     AgentApplicationConflictError,
     AgentApplicationNotFoundError,
 )
+from app.services.telegram_notify import notify_agent_approved
 
 router = APIRouter(
     prefix="/agent-applications",
@@ -57,6 +58,8 @@ async def approve_application(
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     except AgentApplicationConflictError as error:
         raise HTTPException(status.HTTP_409_CONFLICT, detail=str(error)) from error
+    # Best-effort DM — does not fail the approve if Telegram is unreachable.
+    await notify_agent_approved(telegram_id=row.telegram_id, full_name=row.full_name)
     return AgentApplicationResponse.model_validate(row)
 
 

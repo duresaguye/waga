@@ -75,12 +75,34 @@ def _menu_for(context: ContextTypes.DEFAULT_TYPE, user_id: int):
     )
 
 
+async def _sync_agent_from_api(
+    context: ContextTypes.DEFAULT_TYPE, user_id: int, display_name: str | None
+) -> bool:
+    """If admin already approved this telegram id in the API, unlock local submit."""
+    agents = _agents(context)
+    if agents.is_agent(user_id):
+        return True
+    settings = _settings(context)
+    if settings.telegram_dry_run:
+        return False
+    try:
+        data = await _score_api(context).get_score(str(user_id))
+    except Exception:
+        return False
+    if not data.get("is_agent") or data.get("banned"):
+        return False
+    agents.mark_approved(user_id, display_name=display_name, via="api_sync")
+    return True
+
+
 async def _reject_if_not_agent(update: Update, context: ContextTypes.DEFAULT_TYPE) -> bool:
     user = update.effective_user
     if user is None:
         return True
     agents = _agents(context)
     if agents.is_agent(user.id):
+        return False
+    if await _sync_agent_from_api(context, user.id, user.full_name):
         return False
     message = update.effective_message
     if message is not None:
@@ -122,6 +144,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     agents = _agents(context)
     if not agents.is_agent(user.id):
+        await _sync_agent_from_api(context, user.id, user.full_name)
+    if not agents.is_agent(user.id):
         await update.effective_message.reply_text(
             "Welcome to Waga.\n\n" + agents.denial_message(),
             reply_markup=guest_actions_keyboard(),
@@ -152,6 +176,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     assert update.effective_message is not None
     user = update.effective_user
+    if user is not None and not _agents(context).is_agent(user.id):
+        await _sync_agent_from_api(context, user.id, user.full_name)
     is_agent = bool(user and _agents(context).is_agent(user.id))
     help_phone = _settings(context).telegram_help_phone
     await update.effective_message.reply_text(
@@ -232,6 +258,8 @@ async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     user = update.effective_user
     if user is None:
         return
+    if not _agents(context).is_agent(user.id):
+        await _sync_agent_from_api(context, user.id, user.full_name)
     if not _agents(context).is_agent(user.id):
         await update.effective_message.reply_text(
             _agents(context).denial_message(),

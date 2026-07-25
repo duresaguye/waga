@@ -34,10 +34,12 @@ class Settings(BaseSettings):
     addis_ai_chat_url: str = "https://api.addisassistant.com/api/v1/chat_generate"
     addis_ai_default_lang: str = "am"
     review_ai_enabled: bool = True
+    # Optional: same BotFather token as the bot service — used to DM agents on approve.
+    telegram_bot_token: SecretStr | None = None
 
-    @field_validator("addis_ai_api_key", mode="before")
+    @field_validator("addis_ai_api_key", "telegram_bot_token", mode="before")
     @classmethod
-    def empty_addis_key_as_none(cls, value: object) -> object:
+    def empty_secret_as_none(cls, value: object) -> object:
         if value is None:
             return None
         if isinstance(value, str) and not value.strip():
