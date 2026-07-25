@@ -104,3 +104,47 @@ class SubmissionNotFoundError(SubmissionError):
 
 class ReviewConflictError(SubmissionError):
     pass
+
+
+class SubscriptionError(Exception):
+    """Base exception for subscription operations."""
+
+
+class SubscriptionNotFoundError(SubscriptionError):
+    pass
+
+
+class PaymentNotFoundError(SubscriptionError):
+    pass
+
+
+class PaymentAlreadyFinalizedError(SubscriptionError):
+    pass
+
+
+class ExportQuotaExceededError(SubscriptionError):
+    pass
+
+
+class ChapaNotConfiguredError(SubscriptionError):
+    pass
+
+
+class ChapaApiError(SubscriptionError):
+    pass
+
+
+class ChapaWebhookInvalidError(SubscriptionError):
+    pass
+
+
+class PlanNotFoundError(SubscriptionError):
+    pass
+
+
+class PlanConflictError(SubscriptionError):
+    pass
+
+
+class PlanInUseError(SubscriptionError):
+    pass

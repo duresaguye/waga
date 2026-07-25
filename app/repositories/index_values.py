@@ -1,135 +1,130 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 from uuid import UUID
 
-from sqlalchemy import and_, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.enums import IndexStatus, ReviewOutcome
 from app.models.index_values import IndexValue
-from app.models.submissions import Submission
-from app.models.verification import SubmissionVerification
-from app.services.index_rules import METHOD_VERSION_INDEX
+from app.models.reference_data import Commodity, Market
 
 
 class IndexValueRepository:
     def __init__(self, session: AsyncSession) -> None:
         self._session = session
 
-    def add(self, row: IndexValue) -> None:
-        self._session.add(row)
-
-    async def get_by_trigger(
-        self, trigger_verification_id: UUID, *, method_version: str = METHOD_VERSION_INDEX
-    ) -> IndexValue | None:
-        statement = select(IndexValue).where(
-            IndexValue.trigger_verification_id == trigger_verification_id,
-            IndexValue.method_version == method_version,
-        )
-        return await self._session.scalar(statement)
+    def add(self, index_value: IndexValue) -> None:
+        self._session.add(index_value)
 
     async def get_latest_for_cell(
         self,
         *,
         market_id: int,
         commodity_id: int,
-        method_version: str = METHOD_VERSION_INDEX,
-        as_of: datetime | None = None,
-        published_only: bool = False,
     ) -> IndexValue | None:
         statement = (
             select(IndexValue)
             .where(
                 IndexValue.market_id == market_id,
                 IndexValue.commodity_id == commodity_id,
-                IndexValue.method_version == method_version,
             )
             .order_by(IndexValue.computed_at.desc())
             .limit(1)
         )
-        if as_of is not None:
-            statement = statement.where(IndexValue.computed_at <= as_of)
-        if published_only:
-            statement = statement.where(IndexValue.status == IndexStatus.PUBLISHED)
-        return await self._session.scalar(statement)
+        return cast(IndexValue | None, await self._session.scalar(statement))
 
-    async def list_latest_cells(
+    async def list_latest_per_cell(
         self,
         *,
-        method_version: str = METHOD_VERSION_INDEX,
         market_ids: list[int] | None = None,
         commodity_ids: list[int] | None = None,
     ) -> list[IndexValue]:
+        subquery = (
+            select(
+                IndexValue.market_id,
+                IndexValue.commodity_id,
+                func.max(IndexValue.computed_at).label("max_computed_at"),
+            )
+            .group_by(IndexValue.market_id, IndexValue.commodity_id)
+            .subquery()
+        )
         statement = (
             select(IndexValue)
-            .where(IndexValue.method_version == method_version)
-            .order_by(IndexValue.computed_at.desc())
-        )
-        if market_ids is not None:
-            statement = statement.where(IndexValue.market_id.in_(market_ids))
-        if commodity_ids is not None:
-            statement = statement.where(IndexValue.commodity_id.in_(commodity_ids))
-        rows = list(await self._session.scalars(statement))
-        latest: list[IndexValue] = []
-        seen: set[tuple[int, int]] = set()
-        for row in rows:
-            key = (row.market_id, row.commodity_id)
-            if key in seen:
-                continue
-            seen.add(key)
-            latest.append(row)
-        return latest
-
-    async def list_accepted_in_window(
-        self,
-        *,
-        market_id: int,
-        commodity_id: int,
-        window_start: datetime,
-        window_end: datetime,
-    ) -> list[dict[str, Any]]:
-        statement = (
-            select(Submission, SubmissionVerification)
             .join(
-                SubmissionVerification,
-                SubmissionVerification.submission_id == Submission.id,
+                subquery,
+                (IndexValue.market_id == subquery.c.market_id)
+                & (IndexValue.commodity_id == subquery.c.commodity_id)
+                & (IndexValue.computed_at == subquery.c.max_computed_at),
             )
-            .where(
-                Submission.market_id == market_id,
-                Submission.commodity_id == commodity_id,
-                SubmissionVerification.outcome == ReviewOutcome.ACCEPTED,
-                Submission.price_canonical.is_not(None),
-                Submission.received_at >= window_start,
-                Submission.received_at <= window_end,
-            )
-            .order_by(Submission.received_at.desc())
+            .order_by(IndexValue.market_id, IndexValue.commodity_id)
         )
-        rows = await self._session.execute(statement)
-        return [
-            {"submission": submission, "verification": verification}
-            for submission, verification in rows.all()
-        ]
+        values = list(await self._session.scalars(statement))
+        if market_ids is not None:
+            allowed_markets = set(market_ids)
+            values = [row for row in values if row.market_id in allowed_markets]
+        if commodity_ids is not None:
+            allowed_commodities = set(commodity_ids)
+            values = [row for row in values if row.commodity_id in allowed_commodities]
+        return values
 
-    async def list_in_range(
+    async def list_for_cell_in_range(
         self,
         *,
-        commodity_id: int,
         market_id: int | None,
+        commodity_id: int,
         start: datetime,
         end: datetime,
-        method_version: str = METHOD_VERSION_INDEX,
     ) -> list[IndexValue]:
-        filters = [
+        statement: Select[tuple[IndexValue]] = select(IndexValue).where(
             IndexValue.commodity_id == commodity_id,
-            IndexValue.method_version == method_version,
             IndexValue.computed_at >= start,
             IndexValue.computed_at <= end,
-        ]
-        if market_id is not None:
-            filters.append(IndexValue.market_id == market_id)
-        statement = (
-            select(IndexValue)
-            .where(and_(*filters))
-            .order_by(IndexValue.computed_at.asc())
         )
+        if market_id is not None:
+            statement = statement.where(IndexValue.market_id == market_id)
+        statement = statement.order_by(IndexValue.computed_at.asc())
         return list(await self._session.scalars(statement))
+
+    async def list_panel_rows(
+        self,
+        *,
+        start: datetime,
+        end: datetime,
+    ) -> list[dict[str, Any]]:
+        statement = (
+            select(
+                IndexValue,
+                Market,
+                Commodity,
+            )
+            .join(Market, Market.id == IndexValue.market_id)
+            .join(Commodity, Commodity.id == IndexValue.commodity_id)
+            .where(
+                IndexValue.computed_at >= start,
+                IndexValue.computed_at <= end,
+            )
+            .order_by(IndexValue.computed_at.asc(), Market.code, Commodity.code)
+        )
+        rows = await self._session.execute(statement)
+        items: list[dict[str, Any]] = []
+        for index_value, market, commodity in rows.all():
+            items.append(
+                {
+                    "index_value": index_value,
+                    "market": market,
+                    "commodity": commodity,
+                }
+            )
+        return items
+
+    async def get_by_trigger_verification(
+        self,
+        verification_id: UUID,
+        *,
+        method_version: str,
+    ) -> IndexValue | None:
+        statement = select(IndexValue).where(
+            IndexValue.trigger_verification_id == verification_id,
+            IndexValue.method_version == method_version,
+        )
+        return cast(IndexValue | None, await self._session.scalar(statement))

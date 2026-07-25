@@ -29,15 +29,15 @@ class ReviewService:
         session: AsyncSession,
         submissions: SubmissionRepository,
         scores: AgentScoreService,
+        index_calculation: IndexCalculationService,
         settings: Settings,
-        index_calc: IndexCalculationService | None = None,
         triage: ReviewTriageService | None = None,
     ) -> None:
         self._session = session
         self._submissions = submissions
         self._scores = scores
+        self._index_calculation = index_calculation
         self._settings = settings
-        self._index_calc = index_calc
         self._triage = triage or ReviewTriageService(AddisChatClient(settings))
 
     async def list_pending(self, *, limit: int = 50) -> list[dict]:
@@ -141,22 +141,15 @@ class ReviewService:
             accepted=accepted,
             commit=False,
         )
-
-        # Track B hook: recompute market–commodity index on accept.
-        submission = bundle["submission"]
-        if (
-            accepted
-            and self._index_calc is not None
-            and submission.market_id is not None
-            and submission.commodity_id is not None
-        ):
-            await self._index_calc.recompute(
-                submission.market_id,
-                submission.commodity_id,
-                trigger_verification_id=verification.id,
-                commit=False,
-            )
-
+        if accepted:
+            submission = bundle["submission"]
+            if submission.market_id is not None and submission.commodity_id is not None:
+                await self._index_calculation.recompute_cell(
+                    market_id=submission.market_id,
+                    commodity_id=submission.commodity_id,
+                    trigger_verification_id=verification.id,
+                    window_end=submission.received_at,
+                )
         await self._session.commit()
         await self._session.refresh(verification)
         return self._to_item(bundle)

@@ -2,7 +2,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.dependencies import get_agent_application_service, get_agent_score_service
+from app.dependencies import (
+    get_agent_application_repository,
+    get_agent_application_service,
+    get_agent_score_service,
+    get_reward_settings_repository,
+)
 from app.schemas.agents import (
     AgentActivateRequest,
     AgentActivateResponse,
@@ -10,6 +15,9 @@ from app.schemas.agents import (
     AgentScoreResponse,
 )
 from app.schemas.applications import AgentApplicationCreate, AgentApplicationResponse
+from app.schemas.rewards import AgentRedeemRequestResponse
+from app.repositories.agent_applications import AgentApplicationRepository
+from app.repositories.reward_settings import RewardSettingsRepository
 from app.services.agent_applications import AgentApplicationService
 from app.services.agent_score import AgentScoreService
 from app.services.exceptions import (
@@ -55,6 +63,23 @@ async def submit_agent_application(
     return AgentApplicationResponse.model_validate(application)
 
 
+@router.get(
+    "/applications/{telegram_id}",
+    response_model=AgentApplicationResponse,
+)
+async def get_agent_application(
+    telegram_id: str,
+    applications: Annotated[
+        AgentApplicationRepository,
+        Depends(get_agent_application_repository),
+    ],
+) -> AgentApplicationResponse:
+    application = await applications.get_latest_by_telegram_id(telegram_id)
+    if application is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Application not found")
+    return AgentApplicationResponse.model_validate(application)
+
+
 @router.post(
     "/activate",
     response_model=AgentActivateResponse,
@@ -97,6 +122,18 @@ async def get_agent_score(
     return AgentScoreResponse.model_validate(await service.to_score_dict(contributor))
 
 
+@router.get(
+    "/{telegram_id}/redeem-requests",
+    response_model=list[AgentRedeemRequestResponse],
+)
+async def list_agent_redeem_requests(
+    telegram_id: str,
+    rewards: Annotated[RewardSettingsRepository, Depends(get_reward_settings_repository)],
+) -> list[AgentRedeemRequestResponse]:
+    rows = await rewards.list_redeem_requests_by_telegram_id(telegram_id)
+    return [AgentRedeemRequestResponse.model_validate(row) for row in rows]
+
+
 @router.post("/{telegram_id}/redeem", response_model=AgentRedeemResponse)
 async def redeem_agent_score(
     telegram_id: str,
@@ -131,34 +168,11 @@ async def record_pending_submit(
     telegram_id: str,
     service: Annotated[AgentScoreService, Depends(get_agent_score_service)],
 ) -> AgentScoreResponse:
+    """Bot-only hook after a price submission is confirmed."""
     try:
         contributor = await service.record_pending_submit(telegram_id)
     except AgentNotFoundError as error:
         raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     except AgentBannedError as error:
         raise HTTPException(status.HTTP_403_FORBIDDEN, detail=str(error)) from error
-    return AgentScoreResponse.model_validate(await service.to_score_dict(contributor))
-
-
-@router.post("/{telegram_id}/review/accept", response_model=AgentScoreResponse)
-async def accept_affects_score(
-    telegram_id: str,
-    service: Annotated[AgentScoreService, Depends(get_agent_score_service)],
-) -> AgentScoreResponse:
-    try:
-        contributor = await service.apply_review(telegram_id, accepted=True)
-    except AgentNotFoundError as error:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(error)) from error
-    return AgentScoreResponse.model_validate(await service.to_score_dict(contributor))
-
-
-@router.post("/{telegram_id}/review/flag", response_model=AgentScoreResponse)
-async def flag_affects_score(
-    telegram_id: str,
-    service: Annotated[AgentScoreService, Depends(get_agent_score_service)],
-) -> AgentScoreResponse:
-    try:
-        contributor = await service.apply_review(telegram_id, accepted=False)
-    except AgentNotFoundError as error:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=str(error)) from error
     return AgentScoreResponse.model_validate(await service.to_score_dict(contributor))

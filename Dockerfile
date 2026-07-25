@@ -16,6 +16,8 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY . .
 RUN uv sync --frozen --no-dev
 
+RUN uv sync --frozen --no-dev
+
 RUN chmod +x scripts/start-api.sh scripts/start-bot.sh scripts/migrate.sh
 
 EXPOSE 8000

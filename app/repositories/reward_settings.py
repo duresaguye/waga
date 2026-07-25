@@ -27,6 +27,20 @@ class RewardSettingsRepository:
     def add_redeem_request(self, request: AgentRedeemRequest) -> None:
         self._session.add(request)
 
+    async def list_redeem_requests_by_telegram_id(
+        self,
+        telegram_id: str,
+        *,
+        limit: int = 50,
+    ) -> list[AgentRedeemRequest]:
+        statement = (
+            select(AgentRedeemRequest)
+            .where(AgentRedeemRequest.telegram_id == telegram_id)
+            .order_by(AgentRedeemRequest.created_at.desc())
+            .limit(limit)
+        )
+        return list(await self._session.scalars(statement))
+
     async def list_redeem_requests(
         self,
         *,

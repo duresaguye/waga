@@ -18,8 +18,12 @@ services:
   backend:
     build: .
     environment:
+      WAGA_ENVIRONMENT: development
       WAGA_DATABASE_URL: postgresql+asyncpg://waga:waga@db:5432/waga
       WAGA_JWT_SECRET_KEY: replace-with-at-least-32-random-bytes
+      WAGA_SEED_ADMIN_EMAIL: admin@waga.com
+      WAGA_SEED_ADMIN_PASSWORD: AdminPassword12!
+      WAGA_SEED_ADMIN_DISPLAY_NAME: Super Admin
     ports:
       - "8000:8000"
     depends_on:
