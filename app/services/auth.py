@@ -140,10 +140,13 @@ class AuthService:
             user.id,
             family_id=current_session.session_family_id,
         )
+        # replaced_by_session_id is a self-referencing FK, so the replacement row must exist
+        # before the old session can point at it.
+        self._auth_sessions.add(replacement)
+        await self._session.flush()
         current_session.last_used_at = now
         current_session.revoked_at = now
         current_session.replaced_by_session_id = replacement.id
-        self._auth_sessions.add(replacement)
         await self._session.commit()
         return self._issued_tokens(user, new_refresh_token)
 

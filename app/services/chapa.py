@@ -4,7 +4,6 @@ import json
 import re
 from collections.abc import Callable
 from datetime import datetime
-from decimal import Decimal
 from typing import Any
 from urllib.parse import urlencode, urlparse, urlunparse
 from uuid import UUID, uuid4
@@ -30,6 +29,13 @@ from app.services.subscriptions import SubscriptionService, utc_now
 
 
 class ChapaPaymentService:
+    # Chapa reports an unpaid transaction as "pending" while the customer is still on the
+    # checkout page, so only these statuses may close a payment. Anything else leaves it
+    # open for a later poll or webhook to settle.
+    TERMINAL_FAILURE_STATUSES = frozenset(
+        {"failed", "cancelled", "canceled", "expired", "timeout", "reversed", "refunded"}
+    )
+
     def __init__(
         self,
         session: AsyncSession,
@@ -138,10 +144,7 @@ class ChapaPaymentService:
         now = self._clock()
         data = response.get("data")
         if not isinstance(data, dict):
-            payment.status = PaymentStatus.FAILED
-            payment.failure_reason = "chapa_verify_invalid_response"
-            payment.confirmed_at = now
-            await self._session.commit()
+            await self._session.rollback()
             return await self._reload_payment(payment.id)
 
         chapa_status = str(data.get("status", "")).lower()
@@ -160,6 +163,10 @@ class ChapaPaymentService:
                 plan_id=payment.plan_id,
                 tier=tier,
             )
+            return await self._reload_payment(payment.id)
+
+        if chapa_status not in self.TERMINAL_FAILURE_STATUSES:
+            await self._session.rollback()
             return await self._reload_payment(payment.id)
 
         payment.status = PaymentStatus.FAILED

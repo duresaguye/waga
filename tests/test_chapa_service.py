@@ -221,6 +221,83 @@ async def test_verify_and_finalize_success_activates_subscription() -> None:
     assert sub_service.activated[0][1] == BillingPlan.MONTHLY
 
 
+def _pending_payment(tx_ref: str) -> PaymentTransaction:
+    return PaymentTransaction(
+        id=uuid4(),
+        user_id=uuid4(),
+        provider=PaymentProvider.CHAPA,
+        amount_etb=Decimal("1600"),
+        billing_plan=BillingPlan.MONTHLY,
+        plan_id=uuid4(),
+        status=PaymentStatus.PENDING,
+        tx_ref=tx_ref,
+    )
+
+
+@pytest.mark.parametrize("chapa_status", ["pending", "processing", "queued", ""])
+async def test_verify_and_finalize_keeps_payment_open_when_not_yet_settled(
+    chapa_status: str,
+) -> None:
+    payment = _pending_payment("waga-test-pending")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"status": "success", "data": {"status": chapa_status}},
+        )
+
+    service, repo, sub_service = _make_service(handler)
+    repo.payments[payment.tx_ref] = payment
+    repo.payments_by_id[payment.id] = payment
+
+    result = await service.verify_and_finalize(payment.tx_ref)
+
+    assert result.status == PaymentStatus.PENDING
+    assert result.failure_reason is None
+    assert result.confirmed_at is None
+    assert sub_service.activated == []
+
+
+@pytest.mark.parametrize("chapa_status", ["failed", "cancelled", "expired"])
+async def test_verify_and_finalize_marks_failed_on_terminal_status(
+    chapa_status: str,
+) -> None:
+    payment = _pending_payment("waga-test-terminal")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"status": "success", "data": {"status": chapa_status}},
+        )
+
+    service, repo, sub_service = _make_service(handler)
+    repo.payments[payment.tx_ref] = payment
+    repo.payments_by_id[payment.id] = payment
+
+    result = await service.verify_and_finalize(payment.tx_ref)
+
+    assert result.status == PaymentStatus.FAILED
+    assert result.failure_reason == chapa_status
+    assert result.confirmed_at is not None
+    assert sub_service.activated == []
+
+
+async def test_verify_and_finalize_keeps_payment_open_on_malformed_response() -> None:
+    payment = _pending_payment("waga-test-malformed")
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(200, json={"status": "success", "data": None})
+
+    service, repo, _ = _make_service(handler)
+    repo.payments[payment.tx_ref] = payment
+    repo.payments_by_id[payment.id] = payment
+
+    result = await service.verify_and_finalize(payment.tx_ref)
+
+    assert result.status == PaymentStatus.PENDING
+    assert result.failure_reason is None
+
+
 async def test_get_checkout_status_returns_finalized_payment_without_verify() -> None:
     user = _user()
     payment = PaymentTransaction(
@@ -312,9 +389,7 @@ def test_format_chapa_error_handles_validation_object_message() -> None:
 
 
 def test_checkout_customization_respects_chapa_limits() -> None:
-    customization = ChapaPaymentService._checkout_customization(
-        "Professional Monthly (monthly)"
-    )
+    customization = ChapaPaymentService._checkout_customization("Professional Monthly (monthly)")
     assert len(customization["title"]) <= 16
     assert customization["title"] == "Waga"
     assert customization["description"] == "Professional Monthly monthly"
