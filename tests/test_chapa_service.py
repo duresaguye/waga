@@ -211,6 +211,7 @@ async def test_verify_and_finalize_success_activates_subscription() -> None:
 
     service, repo, sub_service = _make_service(handler)
     repo.payments[payment.tx_ref] = payment
+    repo.payments_by_id[payment.id] = payment
 
     finalized = await service.verify_and_finalize("waga-test-success")
 
@@ -218,6 +219,32 @@ async def test_verify_and_finalize_success_activates_subscription() -> None:
     assert finalized.chapa_ref_id == "CHAPA-123"
     assert sub_service.activated[0][0] == user.id
     assert sub_service.activated[0][1] == BillingPlan.MONTHLY
+
+
+async def test_get_checkout_status_returns_finalized_payment_without_verify() -> None:
+    user = _user()
+    payment = PaymentTransaction(
+        id=uuid4(),
+        user_id=user.id,
+        provider=PaymentProvider.CHAPA,
+        amount_etb=Decimal("1600"),
+        billing_plan=BillingPlan.MONTHLY,
+        status=PaymentStatus.SUCCEEDED,
+        tx_ref="waga-test-status",
+        confirmed_at=datetime.now(UTC),
+        created_at=datetime.now(UTC),
+    )
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise AssertionError("verify should not be called for finalized payment")
+
+    service, repo, _ = _make_service(handler)
+    repo.payments_by_id[payment.id] = payment
+
+    result = await service.get_checkout_status(user, payment.id)
+
+    assert result.id == payment.id
+    assert result.status == PaymentStatus.SUCCEEDED
 
 
 async def test_verify_and_finalize_is_idempotent_for_finalized_payment() -> None:
@@ -237,6 +264,7 @@ async def test_verify_and_finalize_is_idempotent_for_finalized_payment() -> None
 
     service, repo, _ = _make_service(handler)
     repo.payments[payment.tx_ref] = payment
+    repo.payments_by_id[payment.id] = payment
 
     result = await service.verify_and_finalize("waga-test-final")
 

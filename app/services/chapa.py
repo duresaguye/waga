@@ -118,7 +118,7 @@ class ChapaPaymentService:
 
         payment.checkout_url = checkout_url
         await self._session.commit()
-        return payment
+        return await self._reload_payment(payment.id)
 
     async def verify_and_finalize(self, tx_ref: str) -> PaymentTransaction:
         secret_key = self._require_secret_key()
@@ -128,7 +128,7 @@ class ChapaPaymentService:
             raise PaymentNotFoundError
         if payment.status != PaymentStatus.PENDING:
             await self._session.rollback()
-            return payment
+            return await self._reload_payment(payment.id)
 
         response = await self._request(
             "GET",
@@ -142,7 +142,7 @@ class ChapaPaymentService:
             payment.failure_reason = "chapa_verify_invalid_response"
             payment.confirmed_at = now
             await self._session.commit()
-            return payment
+            return await self._reload_payment(payment.id)
 
         chapa_status = str(data.get("status", "")).lower()
         if response.get("status") == "success" and chapa_status == "success":
@@ -160,13 +160,13 @@ class ChapaPaymentService:
                 plan_id=payment.plan_id,
                 tier=tier,
             )
-            return payment
+            return await self._reload_payment(payment.id)
 
         payment.status = PaymentStatus.FAILED
         payment.failure_reason = chapa_status or "chapa_payment_failed"
         payment.confirmed_at = now
         await self._session.commit()
-        return payment
+        return await self._reload_payment(payment.id)
 
     async def get_checkout_status(
         self,
@@ -178,9 +178,16 @@ class ChapaPaymentService:
             await self._session.rollback()
             raise PaymentNotFoundError
         if payment.status == PaymentStatus.PENDING:
+            tx_ref = payment.tx_ref
             await self._session.rollback()
-            return await self.verify_and_finalize(payment.tx_ref)
+            return await self.verify_and_finalize(tx_ref)
         await self._session.rollback()
+        return await self._reload_payment(payment_id)
+
+    async def _reload_payment(self, payment_id: UUID) -> PaymentTransaction:
+        payment = await self._subscriptions.get_payment_by_id(payment_id)
+        if payment is None:
+            raise PaymentNotFoundError
         return payment
 
     def verify_webhook_signature(self, body: bytes, signature: str | None) -> None:
