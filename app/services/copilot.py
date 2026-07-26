@@ -1,12 +1,26 @@
-"""Rule-based NGO copilot and impact calculator."""
+"""NGO copilot: rule-based numbers + optional Addis AI narrative (facts only)."""
 
 from __future__ import annotations
 
+import json
+import logging
 from datetime import UTC, datetime
 
 from app.config import Settings
+from app.services.addis_chat import AddisChatClient, AddisChatError
 from app.services.affordability import AffordabilityService
 from app.services.read_meta import build_meta
+
+logger = logging.getLogger(__name__)
+
+COPILOT_SYSTEM = (
+    "You are Waga's cash-assistance copilot for Addis Ababa. "
+    "Use ONLY the JSON facts provided. Never invent prices, markets, or percentages. "
+    "Do not fill insufficient_data gaps. "
+    "Write 3-5 short sentences for NGO programme staff. "
+    "Mention the recommended transfer uplift band exactly as given. "
+    "If language is Amharic, write in Amharic; otherwise English."
+)
 
 
 class CopilotService:
@@ -14,9 +28,11 @@ class CopilotService:
         self,
         affordability: AffordabilityService,
         settings: Settings,
+        chat: AddisChatClient | None = None,
     ) -> None:
         self._affordability = affordability
         self._settings = settings
+        self._chat = chat if chat is not None else AddisChatClient(settings)
 
     async def ask(
         self,
@@ -25,7 +41,6 @@ class CopilotService:
         household_count: int | None = None,
         language: str = "en",
     ) -> dict:
-        _ = (question, language)
         result = await self._affordability.get_affordability()
         data = result["data"]
         meta = result["meta"]
@@ -49,6 +64,8 @@ class CopilotService:
                 citations=[],
                 impact=None,
                 household_count=household_count,
+                mode="rule_based",
+                model=None,
             )
 
         change_pct = data["change_pct"] or 0.0
@@ -61,7 +78,7 @@ class CopilotService:
         band_high = round(change_pct * 1.05, 1)
         purchasing_power = max(0.0, round(100.0 - change_pct, 1))
 
-        answer = (
+        rule_answer = (
             f"The Addis staple basket rose from {data['cost_prior']:,.0f} to "
             f"{data['cost_now']:,.0f} ETB over the last {data['period_days']} days, "
             f"an increase of {change_pct:.1f}%. "
@@ -83,14 +100,57 @@ class CopilotService:
                 "cell_refs": [
                     f"{self._settings.city_code}:{data['basket_code']}:{date_label()}"
                 ],
-            }
+            },
+            {
+                "label": "Basket change",
+                "value": change_pct,
+                "unit": "%",
+                "source": "/affordability",
+                "cell_refs": [
+                    f"{self._settings.city_code}:{data['basket_code']}:change_pct"
+                ],
+            },
         ]
-        confidence = "medium" if cells_expected and cells_published / cells_expected >= 0.7 else "low"
+        confidence = (
+            "medium"
+            if cells_expected and cells_published / cells_expected >= 0.7
+            else "low"
+        )
         confidence_reason = (
             f"{cells_published} of {cells_expected} cells published"
             if cells_expected
             else "Limited coverage data"
         )
+
+        facts = {
+            "question": question,
+            "language": language,
+            "basket": {
+                "cost_now_etb": data["cost_now"],
+                "cost_prior_etb": data["cost_prior"],
+                "change_pct": change_pct,
+                "change_abs_etb": data["change_abs"],
+                "band": data.get("band"),
+                "period_days": data["period_days"],
+                "top_driver": top_item["commodity_code"],
+                "top_driver_contribution_pct": contribution,
+                "purchasing_power_pct": purchasing_power,
+            },
+            "recommendation": {
+                "action": "increase_transfer_value",
+                "band_low_pct": band_low,
+                "band_high_pct": band_high,
+            },
+            "coverage": {
+                "cells_published": cells_published,
+                "cells_expected": cells_expected,
+            },
+            "household_count": household_count,
+            "impact": impact,
+            "rule_answer": rule_answer,
+        }
+
+        answer, mode, model = await self._narrate(facts=facts, language=language, fallback=rule_answer)
 
         return self._response(
             meta=meta,
@@ -103,7 +163,37 @@ class CopilotService:
             citations=citations,
             impact=impact,
             household_count=household_count,
+            mode=mode,
+            model=model,
         )
+
+    async def _narrate(
+        self,
+        *,
+        facts: dict,
+        language: str,
+        fallback: str,
+    ) -> tuple[str, str, str | None]:
+        if not self._chat.enabled:
+            return fallback, "rule_based", None
+        lang = "am" if language.lower().startswith("am") else "en"
+        try:
+            chat = await self._chat.generate(
+                prompt=(
+                    "Rewrite the cash-assistance guidance using only these facts. "
+                    "Keep every number exactly as given.\n\n"
+                    f"{json.dumps(facts, ensure_ascii=False)}"
+                ),
+                system=COPILOT_SYSTEM,
+                target_language=lang,
+                temperature=0.25,
+                max_output_tokens=350,
+                persona="Waga NGO cash-assistance copilot",
+            )
+            return chat.text, "addis_ai", chat.model
+        except AddisChatError:
+            logger.exception("Addis copilot narrative failed; using rule answer")
+            return fallback, "rule_based", None
 
     async def impact(
         self,
@@ -147,6 +237,8 @@ class CopilotService:
         citations: list[dict],
         impact: dict | None,
         household_count: int | None,
+        mode: str,
+        model: str | None,
     ) -> dict:
         payload: dict = {
             "meta": meta,
@@ -160,7 +252,8 @@ class CopilotService:
                     "confidence_reason": confidence_reason,
                 },
                 "citations": citations,
-                "mode": "rule_based",
+                "mode": mode,
+                "model": model,
             },
         }
         if impact is not None:

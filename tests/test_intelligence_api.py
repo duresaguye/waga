@@ -4,6 +4,7 @@ from httpx import ASGITransport, AsyncClient
 from app.dependencies import (
     get_affordability_service,
     get_alerts_service,
+    get_brief_service,
     get_copilot_service,
     get_prices_read_service,
     get_research_service,
@@ -38,7 +39,23 @@ class FakeCopilotService:
         _ = kwargs
         return {
             "meta": {"method_version": "waga-index-v1"},
-            "data": {"answer": "test", "citations": [], "mode": "rule_based"},
+            "data": {
+                "answer": "test",
+                "citations": [],
+                "mode": "rule_based",
+                "recommendation": {
+                    "action": "increase_transfer_value",
+                    "band_low_pct": 10.0,
+                    "band_high_pct": 16.0,
+                    "confidence": "medium",
+                    "confidence_reason": "test",
+                },
+                "impact": {
+                    "household_count": 50000,
+                    "gap_per_household_etb": 770.0,
+                    "monthly_total_etb": 38500000.0,
+                },
+            },
         }
 
     async def impact(self, **kwargs) -> dict:
@@ -46,6 +63,20 @@ class FakeCopilotService:
         return {
             "meta": {"method_version": "waga-index-v1"},
             "data": {"monthly_total_etb": 37500000.0},
+        }
+
+
+class FakeBriefService:
+    async def monthly(self, **kwargs) -> dict:
+        _ = kwargs
+        return {
+            "meta": {"method_version": "waga-index-v1"},
+            "data": {
+                "title": "test brief",
+                "markdown": "# test\n",
+                "executive_summary": "summary",
+                "mode": "template",
+            },
         }
 
 
@@ -80,6 +111,7 @@ class FakePricesReadService:
 def client():
     app.dependency_overrides[get_affordability_service] = lambda: FakeAffordabilityService()
     app.dependency_overrides[get_copilot_service] = lambda: FakeCopilotService()
+    app.dependency_overrides[get_brief_service] = lambda: FakeBriefService()
     app.dependency_overrides[get_alerts_service] = lambda: FakeAlertsService()
     app.dependency_overrides[get_research_service] = lambda: FakeResearchService()
     app.dependency_overrides[get_prices_read_service] = lambda: FakePricesReadService()
@@ -107,6 +139,18 @@ async def test_copilot_and_impact_endpoints(client: AsyncClient) -> None:
         json={"household_count": 50000, "gap_per_household_etb": 750.0, "months": 3},
     )
     assert impact.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_monthly_brief_endpoint(client: AsyncClient) -> None:
+    response = await client.post(
+        "/api/v1/briefs/monthly",
+        json={"household_count": 50000, "language": "en"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["data"]["title"] == "test brief"
+    assert "# test" in body["data"]["markdown"]
 
 
 @pytest.mark.asyncio

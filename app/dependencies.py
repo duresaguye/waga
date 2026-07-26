@@ -224,9 +224,10 @@ def get_copilot_service(
     affordability: Annotated["AffordabilityService", Depends(get_affordability_service)],
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> "CopilotService":
+    from app.services.addis_chat import AddisChatClient
     from app.services.copilot import CopilotService
 
-    return CopilotService(affordability, settings)
+    return CopilotService(affordability, settings, AddisChatClient(settings))
 
 
 def get_alerts_service(
@@ -241,6 +242,24 @@ def get_alerts_service(
     from app.services.alerts import AlertsService
 
     return AlertsService(prices, reference_data, index_values, settings)
+
+
+def get_brief_service(
+    affordability: Annotated["AffordabilityService", Depends(get_affordability_service)],
+    alerts: Annotated["AlertsService", Depends(get_alerts_service)],
+    copilot: Annotated["CopilotService", Depends(get_copilot_service)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> "BriefService":
+    from app.services.addis_chat import AddisChatClient
+    from app.services.brief import BriefService
+
+    return BriefService(
+        affordability,
+        alerts,
+        copilot,
+        settings,
+        AddisChatClient(settings),
+    )
 
 
 def get_business_service(

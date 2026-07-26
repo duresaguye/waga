@@ -38,6 +38,7 @@ class AddisChatClient:
         target_language: str | None = None,
         temperature: float = 0.2,
         max_output_tokens: int = 400,
+        persona: str = "Waga market price review assistant",
     ) -> ChatResult:
         if not self.enabled:
             raise AddisChatError("Addis AI chat is not configured")
@@ -49,7 +50,7 @@ class AddisChatClient:
         payload = {
             "prompt": prompt,
             "target_language": lang,
-            "persona": "Waga market price review assistant",
+            "persona": persona,
             "system": system,
             "generation_config": {
                 "temperature": temperature,

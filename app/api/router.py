@@ -5,6 +5,7 @@ from app.api.routes.affordability import router as affordability_router
 from app.api.routes.agents import router as agents_router
 from app.api.routes.alerts import router as alerts_router
 from app.api.routes.auth import router as auth_router
+from app.api.routes.briefs import router as briefs_router
 from app.api.routes.business import router as business_router
 from app.api.routes.copilot import router as copilot_router
 from app.api.routes.coverage import router as coverage_router
@@ -29,6 +30,7 @@ api_router.include_router(coverage_router)
 api_router.include_router(heatmap_router)
 api_router.include_router(affordability_router)
 api_router.include_router(copilot_router)
+api_router.include_router(briefs_router)
 api_router.include_router(alerts_router)
 api_router.include_router(business_router)
 api_router.include_router(research_router)
