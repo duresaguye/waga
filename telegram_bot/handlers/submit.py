@@ -28,8 +28,8 @@ from telegram_bot.i18n import (
     t,
 )
 from telegram_bot.keyboards import (
-    other_market_prompt_keyboard,
     other_market_voice_lang_keyboard,
+    submit_entry_keyboard,
     voice_label_confirm_keyboard,
     agent_menu_keyboard,
     commodities_keyboard,
@@ -490,12 +490,61 @@ async def consent_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         return ConversationHandler.END
 
     context.user_data["consent_version"] = CONSENT_VERSION
-    await query.edit_message_text(
-        "Consent saved. Accepted reports earn redeemable score.\nChoose the market:"
-    )
+    await query.edit_message_text("Consent saved.")
     assert query.message is not None
-    await query.message.reply_text("Select market:", reply_markup=markets_keyboard())
-    return SubmitState.MARKET
+    await query.message.reply_text(
+        "How do you want to choose the market?",
+        reply_markup=submit_entry_keyboard(),
+    )
+    return SubmitState.ENTRY_MODE
+
+
+async def entry_mode_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    query = update.callback_query
+    assert query is not None
+    await query.answer()
+    data = query.data or ""
+
+    if data == "cancel":
+        return await cancel(update, context)
+
+    if data == "entry:list":
+        await query.edit_message_text("Pick your market from the list.")
+        assert query.message is not None
+        await query.message.reply_text(
+            "Select market:",
+            reply_markup=markets_keyboard(),
+        )
+        return SubmitState.MARKET
+
+    if data == "entry:voice":
+        settings = _settings(context)
+        if not settings.addis_stt_enabled():
+            await query.edit_message_text(
+                "Voice is unavailable right now.\n"
+                "Use Pick from list, or Other market to type a name."
+            )
+            assert query.message is not None
+            await query.message.reply_text(
+                "How do you want to choose the market?",
+                reply_markup=submit_entry_keyboard(),
+            )
+            return SubmitState.ENTRY_MODE
+        await query.edit_message_text(
+            "Record path: choose the language of your voice note."
+        )
+        assert query.message is not None
+        await query.message.reply_text(
+            "Then send one voice note with the market name.",
+            reply_markup=other_market_voice_lang_keyboard(prefix="voice_mkt"),
+        )
+        return SubmitState.MARKET_OTHER
+
+    await query.edit_message_text(
+        "How do you want to choose the market?",
+        reply_markup=submit_entry_keyboard(),
+    )
+    return SubmitState.ENTRY_MODE
 
 
 async def market_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -509,18 +558,16 @@ async def market_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     code = (query.data or "").removeprefix("market:")
     market = market_by_code(code)
     if market is None:
-        await query.edit_message_text("Unknown market. Send /submit to try again.")
+        await query.edit_message_text("Unknown market. Tap Submit price to try again.")
         return ConversationHandler.END
 
     context.user_data["market_code"] = market.code
     context.user_data.pop("market_label", None)
 
     if market.code == OTHER_MARKET_CODE:
-        await query.edit_message_text("Other market")
-        assert query.message is not None
-        await query.message.reply_text(
-            "How do you want to enter the market name?",
-            reply_markup=other_market_prompt_keyboard(prefix="voice_mkt"),
+        await query.edit_message_text(
+            "Other market — type the market name now.\n"
+            "(Amharic, Afaan Oromo, or English)"
         )
         return SubmitState.MARKET_OTHER
 
@@ -532,7 +579,18 @@ async def market_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
 async def market_other_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     assert update.effective_message is not None
-    label = (update.effective_message.text or "").strip()
+    # Ignore stray menu taps while waiting for a typed/other name or voice.
+    text = (update.effective_message.text or "").strip()
+    if not text:
+        return SubmitState.MARKET_OTHER
+    # If user is on voice path, remind them to send voice — not type.
+    if context.user_data.get("entry_voice"):
+        await update.effective_message.reply_text(
+            "You chose Record.\nSend a voice note with the market name,\n"
+            "or tap Cancel and start again."
+        )
+        return SubmitState.MARKET_OTHER
+    label = text
     if len(label) < 2:
         await update.effective_message.reply_text("Please type a market name.")
         return SubmitState.MARKET_OTHER
@@ -545,7 +603,6 @@ async def market_other_message(update: Update, context: ContextTypes.DEFAULT_TYP
     return SubmitState.COMMODITY
 
 
-
 async def market_other_lang_callback(
     update: Update, context: ContextTypes.DEFAULT_TYPE
 ) -> int:
@@ -555,29 +612,25 @@ async def market_other_lang_callback(
     data = query.data or ""
     if data == "cancel":
         return await cancel(update, context)
-    if data == "voice_mkt:mode:type":
-        await query.edit_message_text(
-            "Type the market name in Amharic, Afaan Oromo, or English."
-        )
-        return SubmitState.MARKET_OTHER
     if data == "voice_mkt:mode:choose":
-        await query.edit_message_text(
-            "How do you want to enter the market name?",
-            reply_markup=other_market_prompt_keyboard(prefix="voice_mkt"),
+        # Back from voice-lang → return to entry mode (not nested Other).
+        await query.edit_message_text("How do you want to choose the market?")
+        assert query.message is not None
+        await query.message.reply_text(
+            "Pick list or record:",
+            reply_markup=submit_entry_keyboard(),
         )
-        return SubmitState.MARKET_OTHER
-    if data == "voice_mkt:mode:voice":
-        await query.edit_message_text(
-            "Choose language, then send a voice note with the market name.",
-            reply_markup=other_market_voice_lang_keyboard(prefix="voice_mkt"),
-        )
-        return SubmitState.MARKET_OTHER
+        context.user_data.pop("entry_voice", None)
+        return SubmitState.ENTRY_MODE
     if data.startswith("voice_mkt:lang:"):
         lang = data.rsplit(":", 1)[-1]
         context.user_data["voice_lang"] = lang
+        context.user_data["entry_voice"] = True
         await query.edit_message_text(
-            "Language set.\nSend a voice note with the market name now."
+            "Send a voice note with the market name now.\n"
+            "Do not type — record one short voice message."
         )
+        return SubmitState.MARKET_OTHER
     return SubmitState.MARKET_OTHER
 
 
@@ -587,7 +640,7 @@ async def market_other_voice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not settings.addis_stt_enabled():
         await update.effective_message.reply_text(
             "Voice is unavailable right now.\n"
-            "Please type the market name instead."
+            "Tap Cancel, then Pick from list."
         )
         return SubmitState.MARKET_OTHER
 
@@ -622,7 +675,8 @@ async def market_other_voice(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if result.confidence is not None:
         conf = f"\nConfidence: {result.confidence:.0%}"
     await update.effective_message.reply_text(
-        f"I heard:\n\n{label}{conf}\n\nTap Use this name to continue to submit.",
+        f"I heard:\n\n{label}{conf}\n\n"
+        "Tap Use this name to choose the commodity and price.",
         reply_markup=voice_label_confirm_keyboard(prefix="voice_mkt"),
     )
     return SubmitState.MARKET_OTHER_CONFIRM
@@ -639,20 +693,10 @@ async def market_other_voice_confirm(
     if data == "cancel":
         return await cancel(update, context)
 
-    if data.startswith("voice_mkt:lang:"):
-        lang = data.rsplit(":", 1)[-1]
-        context.user_data["voice_lang"] = lang
-        await query.edit_message_text(
-            "Send a voice note with the market name now."
-        )
-        return SubmitState.MARKET_OTHER
-
     if data == "voice_mkt:retry":
-        await query.edit_message_text("Send another voice note with the market name.")
-        return SubmitState.MARKET_OTHER
-
-    if data == "voice_mkt:type":
-        await query.edit_message_text("Type the market name now.")
+        await query.edit_message_text(
+            "Send another voice note with the market name.\nDo not type."
+        )
         return SubmitState.MARKET_OTHER
 
     if data != "voice_mkt:yes":
@@ -660,16 +704,17 @@ async def market_other_voice_confirm(
 
     label = str(context.user_data.get("pending_market_label") or "").strip()
     if len(label) < 2:
-        await query.edit_message_text("Missing name. Send a voice note or type it.")
+        await query.edit_message_text("Missing name. Send the voice note again.")
         return SubmitState.MARKET_OTHER
 
     context.user_data["market_code"] = OTHER_MARKET_CODE
     context.user_data["market_label"] = label
     context.user_data.pop("pending_market_label", None)
-    await query.edit_message_text(f"Market saved: {label}")
+    context.user_data.pop("entry_voice", None)
+    await query.edit_message_text(f"Market: {label}")
     assert query.message is not None
     await query.message.reply_text(
-        "Next: choose the food, enter the price, then Confirm to submit.",
+        "Select commodity:",
         reply_markup=commodities_keyboard(),
     )
     return SubmitState.COMMODITY
@@ -786,8 +831,12 @@ async def confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         can_redeem = profile.can_redeem()
         score_bit = f"\nScore: {profile.score}"
 
+    redeem_bit = ""
+    if can_redeem:
+        redeem_bit = "\nYou can redeem from Redeem score when ready."
     await query.edit_message_text(
-        f"Price report submitted. Thank you!{score_bit}"
+        f"✅ Report saved. Thank you!{score_bit}{redeem_bit}\n\n"
+        "Done for now — only tap Submit price if you have another price."
     )
     lang = get_ui_lang(context)
     if query.message is not None:
@@ -795,11 +844,6 @@ async def confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             t("menu", lang),
             reply_markup=agent_menu_keyboard(lang),
         )
-        if can_redeem:
-            await query.message.reply_text(
-                "You can redeem now.",
-                reply_markup=score_actions_keyboard(can_redeem=True, lang=lang),
-            )
     _clear_flow_data(context)
     return ConversationHandler.END
 
@@ -865,6 +909,11 @@ def register_submit_handlers(application: Application) -> None:
             SubmitState.CONSENT: [
                 CallbackQueryHandler(consent_callback, pattern=r"^consent:"),
             ],
+            SubmitState.ENTRY_MODE: [
+                CallbackQueryHandler(
+                    entry_mode_callback, pattern=r"^(entry:.+|cancel)$"
+                ),
+            ],
             SubmitState.MARKET: [
                 CallbackQueryHandler(market_callback, pattern=r"^(market:.+|cancel)$"),
             ],
@@ -872,7 +921,8 @@ def register_submit_handlers(application: Application) -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, market_other_message),
                 MessageHandler(filters.VOICE | filters.AUDIO, market_other_voice),
                 CallbackQueryHandler(
-                    market_other_lang_callback, pattern=r"^(voice_mkt:(mode|lang):.+|cancel)$"
+                    market_other_lang_callback,
+                    pattern=r"^(voice_mkt:(mode|lang):.+|cancel)$",
                 ),
             ],
             SubmitState.MARKET_OTHER_CONFIRM: [

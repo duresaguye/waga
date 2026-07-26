@@ -3,6 +3,7 @@ from enum import IntEnum, auto
 
 class SubmitState(IntEnum):
     CONSENT = auto()
+    ENTRY_MODE = auto()
     MARKET = auto()
     MARKET_OTHER = auto()
     MARKET_OTHER_CONFIRM = auto()

@@ -184,17 +184,29 @@ def score_actions_keyboard(*, can_redeem: bool, lang: str = DEFAULT_UI_LANG) -> 
     return InlineKeyboardMarkup(rows)
 
 
+def submit_entry_keyboard() -> InlineKeyboardMarkup:
+    """First choice after consent: pick a listed market or record a name."""
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("📋 Pick from list", callback_data="entry:list")],
+            [InlineKeyboardButton("🎤 Record market name", callback_data="entry:voice")],
+            [InlineKeyboardButton("Cancel", callback_data="cancel")],
+        ]
+    )
+
+
 def voice_label_confirm_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("Use this name — continue", callback_data=f"{prefix}:yes")],
-            [InlineKeyboardButton("Record again", callback_data=f"{prefix}:retry")],
-            [InlineKeyboardButton("Type instead", callback_data=f"{prefix}:type")],
+            [InlineKeyboardButton("✅ Use this name", callback_data=f"{prefix}:yes")],
+            [InlineKeyboardButton("🎤 Record again", callback_data=f"{prefix}:retry")],
+            [InlineKeyboardButton("Cancel", callback_data="cancel")],
         ]
     )
 
 
 def other_market_prompt_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
+    """Legacy helper kept for apply flow; submit no longer nests record under Other."""
     cancel = "cancel" if prefix == "voice_mkt" else "apply_cancel"
     return InlineKeyboardMarkup(
         [
@@ -207,13 +219,14 @@ def other_market_prompt_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboard
 
 def other_market_voice_lang_keyboard(*, prefix: str = "voice_mkt") -> InlineKeyboardMarkup:
     cancel = "cancel" if prefix == "voice_mkt" else "apply_cancel"
+    back = f"{prefix}:mode:choose"
     return InlineKeyboardMarkup(
         [
             [
                 InlineKeyboardButton("Amharic", callback_data=f"{prefix}:lang:am"),
                 InlineKeyboardButton("Afaan Oromo", callback_data=f"{prefix}:lang:om"),
             ],
-            [InlineKeyboardButton("Back", callback_data=f"{prefix}:mode:choose")],
+            [InlineKeyboardButton("← Back", callback_data=back)],
             [InlineKeyboardButton("Cancel", callback_data=cancel)],
         ]
     )
