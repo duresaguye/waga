@@ -97,13 +97,12 @@ class AgentRegistry:
     def denial_message(self) -> str:
         return (
             "To join as a market agent:\n"
-            "1) Tap Apply to be agent\n"
-            "2) Or tap Enter invite code if you already have one."
+            "Tap Apply to be agent and wait for approval."
         )
 
     def join_prompt(self) -> str:
+        # Invite codes are not shown in the demo guest UX.
         return (
-            "Enter your invite code.\n"
-            "Send it as: /agent YOUR-CODE\n"
-            "Example: /agent WAGA-ADDIS-01"
+            "To join as a market agent, tap Apply to be agent "
+            "and wait for approval."
         )

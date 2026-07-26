@@ -1,5 +1,16 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup
 
+from telegram_bot.i18n import (
+    BTN_APPLY,
+    BTN_HELP,
+    BTN_LANGUAGE,
+    BTN_REDEEM,
+    BTN_SCORE,
+    BTN_SUBMIT,
+    DEFAULT_UI_LANG,
+    btn,
+    t,
+)
 from telegram_bot.reference import COMMODITIES, MARKETS
 
 
@@ -56,35 +67,50 @@ def confirm_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def guest_menu_keyboard() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(
-        [
-            ["Apply to be agent", "Enter invite code"],
-            ["Help"],
-        ],
-        resize_keyboard=True,
-    )
-
-
-def agent_menu_keyboard() -> ReplyKeyboardMarkup:
-    return ReplyKeyboardMarkup(
-        [
-            ["Submit price", "My score"],
-            ["Redeem score", "Help"],
-        ],
-        resize_keyboard=True,
-    )
-
-def main_menu_keyboard(*, is_agent: bool = False) -> ReplyKeyboardMarkup:
-    return agent_menu_keyboard() if is_agent else guest_menu_keyboard()
-
-
-def guest_actions_keyboard() -> InlineKeyboardMarkup:
+def language_picker_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         [
-            [InlineKeyboardButton("Apply to be agent", callback_data="ui:apply")],
-            [InlineKeyboardButton("Enter invite code", callback_data="ui:enter_code")],
-            [InlineKeyboardButton("How to join", callback_data="ui:how_to_join")],
+            [InlineKeyboardButton("English", callback_data="ui_lang:en")],
+            [InlineKeyboardButton("አማርኛ", callback_data="ui_lang:am")],
+            [InlineKeyboardButton("Afaan Oromoo", callback_data="ui_lang:om")],
+        ]
+    )
+
+
+def guest_menu_keyboard(lang: str = DEFAULT_UI_LANG) -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        [
+            [btn(BTN_APPLY, lang)],
+            [btn(BTN_HELP, lang), btn(BTN_LANGUAGE, lang)],
+        ],
+        resize_keyboard=True,
+    )
+
+
+def agent_menu_keyboard(lang: str = DEFAULT_UI_LANG) -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        [
+            [btn(BTN_SUBMIT, lang), btn(BTN_SCORE, lang)],
+            [btn(BTN_REDEEM, lang), btn(BTN_HELP, lang)],
+            [btn(BTN_LANGUAGE, lang)],
+        ],
+        resize_keyboard=True,
+    )
+
+
+def main_menu_keyboard(*, is_agent: bool = False, lang: str = DEFAULT_UI_LANG) -> ReplyKeyboardMarkup:
+    return agent_menu_keyboard(lang) if is_agent else guest_menu_keyboard(lang)
+
+
+def guest_actions_keyboard(lang: str = DEFAULT_UI_LANG) -> InlineKeyboardMarkup:
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton(btn(BTN_APPLY, lang), callback_data="ui:apply")],
+            [
+                InlineKeyboardButton(
+                    t("how_to_join_btn", lang), callback_data="ui:how_to_join"
+                )
+            ],
         ]
     )
 
@@ -146,13 +172,15 @@ def apply_confirm_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def score_actions_keyboard(*, can_redeem: bool) -> InlineKeyboardMarkup:
+def score_actions_keyboard(*, can_redeem: bool, lang: str = DEFAULT_UI_LANG) -> InlineKeyboardMarkup:
     rows: list[list[InlineKeyboardButton]] = []
     if can_redeem:
         rows.append(
-            [InlineKeyboardButton("🎁 Redeem score", callback_data="ui:redeem")]
+            [InlineKeyboardButton(f"🎁 {btn(BTN_REDEEM, lang)}", callback_data="ui:redeem")]
         )
-    rows.append([InlineKeyboardButton("📤 Submit price", callback_data="ui:submit")])
+    rows.append(
+        [InlineKeyboardButton(f"📤 {btn(BTN_SUBMIT, lang)}", callback_data="ui:submit")]
+    )
     return InlineKeyboardMarkup(rows)
 
 

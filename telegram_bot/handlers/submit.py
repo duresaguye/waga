@@ -14,6 +14,19 @@ from telegram.ext import (
     filters,
 )
 
+from telegram_bot.i18n import (
+    BTN_HELP,
+    BTN_LANGUAGE,
+    BTN_REDEEM,
+    BTN_SCORE,
+    BTN_SUBMIT,
+    UI_LANG_KEY,
+    button_regex,
+    get_ui_lang,
+    has_ui_lang,
+    set_ui_lang,
+    t,
+)
 from telegram_bot.keyboards import (
     other_market_prompt_keyboard,
     other_market_voice_lang_keyboard,
@@ -24,6 +37,7 @@ from telegram_bot.keyboards import (
     consent_keyboard,
     guest_actions_keyboard,
     guest_menu_keyboard,
+    language_picker_keyboard,
     markets_keyboard,
     score_actions_keyboard,
 )
@@ -68,11 +82,74 @@ def _settings(context: ContextTypes.DEFAULT_TYPE) -> TelegramBotSettings:
 
 
 def _menu_for(context: ContextTypes.DEFAULT_TYPE, user_id: int):
+    lang = get_ui_lang(context)
     return (
-        agent_menu_keyboard()
+        agent_menu_keyboard(lang)
         if _agents(context).is_agent(user_id)
-        else guest_menu_keyboard()
+        else guest_menu_keyboard(lang)
     )
+
+
+def _clear_flow_data(context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Clear conversation draft data but keep UI language preference."""
+    lang = context.user_data.get(UI_LANG_KEY)
+    context.user_data.clear()
+    if lang is not None:
+        context.user_data[UI_LANG_KEY] = lang
+
+
+async def _prompt_language(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    message = update.effective_message
+    if message is None:
+        return
+    await message.reply_text(
+        t("choose_language", "en"),
+        reply_markup=language_picker_keyboard(),
+    )
+
+
+async def language_menu_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    await _prompt_language(update, context)
+
+
+async def language_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    assert query is not None
+    await query.answer()
+    data = query.data or ""
+    if not data.startswith("ui_lang:"):
+        return
+    lang = set_ui_lang(context, data.split(":", 1)[1])
+    if query.message is None:
+        return
+    await query.edit_message_text(t("language_set", lang))
+    user = update.effective_user
+    if user is None:
+        return
+    agents = _agents(context)
+    if not agents.is_agent(user.id):
+        await _sync_agent_from_api(context, user.id, user.full_name)
+    is_agent = agents.is_agent(user.id)
+    if is_agent:
+        profile = _client(context).reputation_for(user.id)
+        await query.message.reply_text(
+            t(
+                "welcome_agent",
+                lang,
+                score=profile.score,
+                status=profile.status_label(),
+            ),
+            reply_markup=agent_menu_keyboard(lang),
+        )
+    else:
+        await query.message.reply_text(
+            f"{t('welcome_guest', lang)}\n\n{t('denial', lang)}",
+            reply_markup=guest_actions_keyboard(lang),
+        )
+        await query.message.reply_text(
+            t("menu", lang),
+            reply_markup=guest_menu_keyboard(lang),
+        )
 
 
 async def _sync_agent_from_api(
@@ -106,13 +183,14 @@ async def _reject_if_not_agent(update: Update, context: ContextTypes.DEFAULT_TYP
         return False
     message = update.effective_message
     if message is not None:
+        lang = get_ui_lang(context)
         await message.reply_text(
-            agents.denial_message(),
-            reply_markup=guest_actions_keyboard(),
+            t("denial", lang),
+            reply_markup=guest_actions_keyboard(lang),
         )
         await message.reply_text(
-            "Use the buttons below.",
-            reply_markup=guest_menu_keyboard(),
+            t("use_buttons", lang),
+            reply_markup=guest_menu_keyboard(lang),
         )
     return True
 
@@ -142,33 +220,42 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     if user is None:
         return ConversationHandler.END
 
+    if not has_ui_lang(context):
+        await _prompt_language(update, context)
+        return ConversationHandler.END
+
+    lang = get_ui_lang(context)
     agents = _agents(context)
     if not agents.is_agent(user.id):
         await _sync_agent_from_api(context, user.id, user.full_name)
     if not agents.is_agent(user.id):
         await update.effective_message.reply_text(
-            "Welcome to Waga.\n\n" + agents.denial_message(),
-            reply_markup=guest_actions_keyboard(),
+            f"{t('welcome_guest', lang)}\n\n{t('denial', lang)}",
+            reply_markup=guest_actions_keyboard(lang),
         )
         await update.effective_message.reply_text(
-            "Menu:",
-            reply_markup=guest_menu_keyboard(),
+            t("menu", lang),
+            reply_markup=guest_menu_keyboard(lang),
         )
         return ConversationHandler.END
 
     if await _reject_if_banned(update, context):
         return ConversationHandler.END
 
-    context.user_data.clear()
+    _clear_flow_data(context)
     profile = _client(context).reputation_for(user.id)
     await update.effective_message.reply_text(
-        "Welcome, Waga market agent.\n"
-        f"Score: {profile.score} ({profile.status_label()})\n\n"
-        "Visit your market, then submit real prices.\n"
-        "Accepted reports raise your score.\n"
-        "Score can be redeemed for rewards.\n\n"
-        "Tap below to continue.",
+        t(
+            "welcome_agent",
+            lang,
+            score=profile.score,
+            status=profile.status_label(),
+        ),
         reply_markup=consent_keyboard(),
+    )
+    await update.effective_message.reply_text(
+        t("menu", lang),
+        reply_markup=agent_menu_keyboard(lang),
     )
     return SubmitState.CONSENT
 
@@ -179,38 +266,33 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if user is not None and not _agents(context).is_agent(user.id):
         await _sync_agent_from_api(context, user.id, user.full_name)
     is_agent = bool(user and _agents(context).is_agent(user.id))
+    lang = get_ui_lang(context)
     help_phone = _settings(context).telegram_help_phone
+    key = "help_agent" if is_agent else "help_guest"
     await update.effective_message.reply_text(
-        "Waga market agent bot\n\n"
-        "Join:\n"
-        "1) /apply — name, phone, city, market, visit schedule\n"
-        "2) Or /agent CODE if you already have an invite\n\n"
-        "Commands:\n"
-        "• /submit — report a market price\n"
-        "• /score — view score\n"
-        "• /redeem — redeem score for birr rewards\n"
-        "• /cancel — cancel current flow\n\n"
-        f"Need help? Call {help_phone}",
-        reply_markup=agent_menu_keyboard() if is_agent else guest_menu_keyboard(),
+        t(key, lang, phone=help_phone),
+        reply_markup=agent_menu_keyboard(lang) if is_agent else guest_menu_keyboard(lang),
     )
 
 
 async def agent_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Ops-only invite activation (not shown in guest menus)."""
     assert update.effective_message is not None
     user = update.effective_user
     if user is None:
         return
+    lang = get_ui_lang(context)
     agents = _agents(context)
     if not context.args:
         if agents.is_agent(user.id):
             await update.effective_message.reply_text(
-                "You are already a market agent.\nUse Submit price or /submit.",
-                reply_markup=agent_menu_keyboard(),
+                t("already_agent", lang),
+                reply_markup=agent_menu_keyboard(lang),
             )
             return
         await update.effective_message.reply_text(
-            agents.join_prompt(),
-            reply_markup=guest_menu_keyboard(),
+            t("denial", lang),
+            reply_markup=guest_menu_keyboard(lang),
         )
         return
 
@@ -227,16 +309,15 @@ async def agent_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             logger.exception("API agent activate failed")
             await update.effective_message.reply_text(
                 "Could not activate via API. Check that the backend is running.",
-                reply_markup=guest_menu_keyboard(),
+                reply_markup=guest_menu_keyboard(lang),
             )
             return
-        # Mirror into local registry so submit gating works this session.
         agents.activate_with_invite(user.id, code, display_name=user.full_name)
         score = data.get("score", {})
         await update.effective_message.reply_text(
             f"{data.get('message', 'Activated.')}\n"
             f"Score: {score.get('score', 0)} ({score.get('status', 'Active')})",
-            reply_markup=agent_menu_keyboard(),
+            reply_markup=agent_menu_keyboard(lang),
         )
         return
 
@@ -247,7 +328,7 @@ async def agent_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     )
     await update.effective_message.reply_text(
         message,
-        reply_markup=agent_menu_keyboard() if ok else guest_menu_keyboard(),
+        reply_markup=agent_menu_keyboard(lang) if ok else guest_menu_keyboard(lang),
     )
     if ok:
         logger.info("Activated agent telegram_user_id=%s via invite", user.id)
@@ -260,10 +341,11 @@ async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
     if not _agents(context).is_agent(user.id):
         await _sync_agent_from_api(context, user.id, user.full_name)
+    lang = get_ui_lang(context)
     if not _agents(context).is_agent(user.id):
         await update.effective_message.reply_text(
-            _agents(context).denial_message(),
-            reply_markup=guest_actions_keyboard(),
+            t("denial", lang),
+            reply_markup=guest_actions_keyboard(lang),
         )
         return
 
@@ -275,7 +357,7 @@ async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             logger.exception("API score fetch failed")
             await update.effective_message.reply_text(
                 "Could not load score from API.",
-                reply_markup=agent_menu_keyboard(),
+                reply_markup=agent_menu_keyboard(lang),
             )
             return
         pending = int(data.get("pending_count", 0) or 0)
@@ -291,20 +373,24 @@ async def score_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         )
         await update.effective_message.reply_text(
             text,
-            reply_markup=score_actions_keyboard(can_redeem=bool(data.get("can_redeem"))),
+            reply_markup=score_actions_keyboard(
+                can_redeem=bool(data.get("can_redeem")), lang=lang
+            ),
         )
-        await update.effective_message.reply_text("Menu:", reply_markup=agent_menu_keyboard())
+        await update.effective_message.reply_text(
+            t("menu", lang), reply_markup=agent_menu_keyboard(lang)
+        )
         return
 
     store = _reputation_store(context)
     profile = store.get(user.id)
     await update.effective_message.reply_text(
         store.format_card(profile),
-        reply_markup=score_actions_keyboard(can_redeem=profile.can_redeem()),
+        reply_markup=score_actions_keyboard(can_redeem=profile.can_redeem(), lang=lang),
     )
     await update.effective_message.reply_text(
-        "Menu:",
-        reply_markup=agent_menu_keyboard(),
+        t("menu", lang),
+        reply_markup=agent_menu_keyboard(lang),
     )
 
 
@@ -313,10 +399,13 @@ async def redeem_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user = update.effective_user
     if user is None:
         return
+    lang = get_ui_lang(context)
+    if not _agents(context).is_agent(user.id):
+        await _sync_agent_from_api(context, user.id, user.full_name)
     if not _agents(context).is_agent(user.id):
         await update.effective_message.reply_text(
-            _agents(context).denial_message(),
-            reply_markup=guest_menu_keyboard(),
+            t("denial", lang),
+            reply_markup=guest_menu_keyboard(lang),
         )
         return
 
@@ -329,25 +418,25 @@ async def redeem_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             detail = getattr(getattr(error, "response", None), "text", None)
             await update.effective_message.reply_text(
                 detail or "Could not redeem via API.",
-                reply_markup=agent_menu_keyboard(),
+                reply_markup=agent_menu_keyboard(lang),
             )
             return
         score = data.get("score", {})
         await update.effective_message.reply_text(
             f"{data.get('message', 'Redeem recorded.')}\n"
             f"Score now: {score.get('score', 0)}",
-            reply_markup=agent_menu_keyboard(),
+            reply_markup=agent_menu_keyboard(lang),
         )
         return
 
     ok, message, profile = _reputation_store(context).redeem(user.id)
     await update.effective_message.reply_text(
         message,
-        reply_markup=score_actions_keyboard(can_redeem=profile.can_redeem()),
+        reply_markup=score_actions_keyboard(can_redeem=profile.can_redeem(), lang=lang),
     )
     await update.effective_message.reply_text(
-        "Menu:",
-        reply_markup=agent_menu_keyboard(),
+        t("menu", lang),
+        reply_markup=agent_menu_keyboard(lang),
     )
     if ok:
         logger.info(
@@ -357,26 +446,15 @@ async def redeem_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         )
 
 
-async def enter_code_prompt(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    assert update.effective_message is not None
-    await update.effective_message.reply_text(
-        _agents(context).join_prompt(),
-        reply_markup=guest_menu_keyboard(),
-    )
-
-
 async def ui_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int | None:
     query = update.callback_query
     assert query is not None
     await query.answer()
     data = query.data or ""
+    lang = get_ui_lang(context)
 
     if data == "ui:how_to_join":
-        await query.edit_message_text(_agents(context).denial_message())
-        return None
-
-    if data == "ui:enter_code":
-        await query.edit_message_text(_agents(context).join_prompt())
+        await query.edit_message_text(t("denial", lang))
         return None
 
     if data == "ui:redeem":
@@ -390,10 +468,8 @@ async def ui_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         return None
 
     if data == "ui:submit":
-        # Kick off submit flow from score card.
         if query.message is not None:
-            # Create a synthetic path by asking user to tap Submit price
-            await query.edit_message_text("Tap Submit price in the menu, or send /submit.")
+            await query.edit_message_text(t("tap_submit", lang))
         return None
 
     return None
@@ -678,7 +754,7 @@ async def confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         await query.edit_message_text(
             "Could not save right now. Please try again with /submit."
         )
-        context.user_data.clear()
+        _clear_flow_data(context)
         return ConversationHandler.END
 
     if result.get("status") == "banned":
@@ -691,7 +767,7 @@ async def confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             f"Reason: {reason}\n"
             "Use /score for details."
         )
-        context.user_data.clear()
+        _clear_flow_data(context)
         return ConversationHandler.END
 
     if result.get("status") == "error":
@@ -700,7 +776,7 @@ async def confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
             f"{result.get('message', 'Please try again.')}\n"
             "Use /submit to start over."
         )
-        context.user_data.clear()
+        _clear_flow_data(context)
         return ConversationHandler.END
 
     profile = result.get("reputation")
@@ -713,32 +789,36 @@ async def confirm_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await query.edit_message_text(
         f"Price report submitted. Thank you!{score_bit}"
     )
+    lang = get_ui_lang(context)
     if query.message is not None:
         await query.message.reply_text(
-            "Menu:",
-            reply_markup=agent_menu_keyboard(),
+            t("menu", lang),
+            reply_markup=agent_menu_keyboard(lang),
         )
         if can_redeem:
             await query.message.reply_text(
                 "You can redeem now.",
-                reply_markup=score_actions_keyboard(can_redeem=True),
+                reply_markup=score_actions_keyboard(can_redeem=True, lang=lang),
             )
-    context.user_data.clear()
+    _clear_flow_data(context)
     return ConversationHandler.END
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    context.user_data.clear()
+    lang = get_ui_lang(context)
+    _clear_flow_data(context)
     message = update.effective_message
     query = update.callback_query
     user = update.effective_user
-    menu = guest_menu_keyboard()
+    menu = guest_menu_keyboard(lang)
     if user is not None:
         menu = _menu_for(context, user.id)
     text = "Cancelled. Use the menu when you are ready."
     if query is not None:
         await query.answer()
         await query.edit_message_text(text)
+        if query.message is not None:
+            await query.message.reply_text(t("menu", lang), reply_markup=menu)
     elif message is not None:
         await message.reply_text(text, reply_markup=menu)
     return ConversationHandler.END
@@ -779,7 +859,7 @@ def register_submit_handlers(application: Application) -> None:
         entry_points=[
             CommandHandler("start", start),
             CommandHandler("submit", start),
-            MessageHandler(filters.Regex(r"^Submit price$"), menu_submit),
+            MessageHandler(filters.Regex(button_regex(BTN_SUBMIT)), menu_submit),
         ],
         states={
             SubmitState.CONSENT: [
@@ -823,11 +903,16 @@ def register_submit_handlers(application: Application) -> None:
     application.add_handler(CommandHandler("redeem", redeem_command))
     application.add_handler(CommandHandler("agent", agent_command))
     application.add_handler(CallbackQueryHandler(ui_callback, pattern=r"^ui:"))
-    application.add_handler(MessageHandler(filters.Regex(r"^Help$"), help_command))
-    application.add_handler(MessageHandler(filters.Regex(r"^My score$"), score_command))
+    application.add_handler(CallbackQueryHandler(language_callback, pattern=r"^ui_lang:"))
     application.add_handler(
-        MessageHandler(filters.Regex(r"^Redeem score$"), redeem_command)
+        MessageHandler(filters.Regex(button_regex(BTN_HELP)), help_command)
     )
     application.add_handler(
-        MessageHandler(filters.Regex(r"^Enter invite code$"), enter_code_prompt)
+        MessageHandler(filters.Regex(button_regex(BTN_SCORE)), score_command)
+    )
+    application.add_handler(
+        MessageHandler(filters.Regex(button_regex(BTN_REDEEM)), redeem_command)
+    )
+    application.add_handler(
+        MessageHandler(filters.Regex(button_regex(BTN_LANGUAGE)), language_menu_prompt)
     )

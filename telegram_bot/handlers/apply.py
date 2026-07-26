@@ -16,8 +16,10 @@ from telegram.ext import (
 )
 
 from telegram_bot.config import TelegramBotSettings, get_bot_settings
+from telegram_bot.i18n import BTN_APPLY, button_regex, get_ui_lang, t
 from telegram_bot.keyboards import (
     ADDIS_SUBCITIES,
+    agent_menu_keyboard,
     apply_city_keyboard,
     apply_confirm_keyboard,
     apply_consent_keyboard,
@@ -31,7 +33,9 @@ from telegram_bot.keyboards import (
     voice_label_confirm_keyboard,
 )
 from telegram_bot.reference import OTHER_MARKET_CODE
+from telegram_bot.services.agents import AgentRegistry
 from telegram_bot.services.addis_stt import AddisSTTError
+from telegram_bot.services.score_api import AgentScoreAPI
 from telegram_bot.services.voice_intake import transcribe_message_audio
 from telegram_bot.states import ApplyState
 
@@ -53,7 +57,50 @@ def _settings(context: ContextTypes.DEFAULT_TYPE) -> TelegramBotSettings:
     return context.application.bot_data.get("settings") or get_bot_settings()
 
 
+def _agents(context: ContextTypes.DEFAULT_TYPE) -> AgentRegistry:
+    return context.application.bot_data["agents"]
+
+
+def _score_api(context: ContextTypes.DEFAULT_TYPE) -> AgentScoreAPI:
+    return context.application.bot_data["score_api"]
+
+
+async def _sync_agent_from_api(
+    context: ContextTypes.DEFAULT_TYPE, user_id: int, display_name: str | None
+) -> bool:
+    agents = _agents(context)
+    if agents.is_agent(user_id):
+        return True
+    settings = _settings(context)
+    if settings.telegram_dry_run:
+        return False
+    try:
+        data = await _score_api(context).get_score(str(user_id))
+    except Exception:
+        return False
+    if not data.get("is_agent") or data.get("banned"):
+        return False
+    agents.mark_approved(user_id, display_name=display_name, via="api_sync")
+    return True
+
+
 async def apply_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    lang = get_ui_lang(context)
+    user = update.effective_user
+    if user is not None:
+        if not _agents(context).is_agent(user.id):
+            await _sync_agent_from_api(context, user.id, user.full_name)
+        if _agents(context).is_agent(user.id):
+            text = t("apply_blocked", lang)
+            menu = agent_menu_keyboard(lang)
+            if update.callback_query is not None:
+                await update.callback_query.answer()
+                if update.callback_query.message is not None:
+                    await update.callback_query.message.reply_text(text, reply_markup=menu)
+            elif update.effective_message is not None:
+                await update.effective_message.reply_text(text, reply_markup=menu)
+            return ConversationHandler.END
+
     context.user_data["apply"] = {"languages_selected": []}
     text = (
         "Apply to become a Waga market agent.\n\n"
@@ -517,11 +564,17 @@ async def apply_confirm(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
         return ConversationHandler.END
 
     logger.info("Application saved for telegram_id=%s via %s", user.id, api_url)
+    lang = get_ui_lang(context)
     await query.edit_message_text(
         "Application submitted. Thank you!\n"
         "Our team will review it."
     )
     context.user_data.pop("apply", None)
+    if query.message is not None:
+        await query.message.reply_text(
+            t("menu", lang),
+            reply_markup=guest_menu_keyboard(lang),
+        )
     return ConversationHandler.END
 
 
@@ -529,12 +582,18 @@ async def apply_cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     context.user_data.pop("apply", None)
     query = update.callback_query
     message = update.effective_message
+    lang = get_ui_lang(context)
+    user = update.effective_user
+    is_agent = bool(user and _agents(context).is_agent(user.id))
+    menu = agent_menu_keyboard(lang) if is_agent else guest_menu_keyboard(lang)
     text = "Application cancelled."
     if query is not None:
         await query.answer()
         await query.edit_message_text(text)
+        if query.message is not None:
+            await query.message.reply_text(t("menu", lang), reply_markup=menu)
     elif message is not None:
-        await message.reply_text(text, reply_markup=guest_menu_keyboard())
+        await message.reply_text(text, reply_markup=menu)
     return ConversationHandler.END
 
 
@@ -542,7 +601,7 @@ def register_apply_handlers(application: Application) -> None:
     conversation = ConversationHandler(
         entry_points=[
             CommandHandler("apply", apply_start),
-            MessageHandler(filters.Regex(r"^Apply to be agent$"), apply_start),
+            MessageHandler(filters.Regex(button_regex(BTN_APPLY)), apply_start),
             CallbackQueryHandler(apply_start, pattern=r"^ui:apply$"),
         ],
         states={
